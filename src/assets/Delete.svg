@@ -1,0 +1,15 @@
+<!-- <svg viewBox="15 15 40 50" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" width="30" height="30">
+
+  <rect x="15" y="15" width="40" height="50" rx="6" ry="6" fill="none" stroke="black" stroke-width="3"/>
+  
+
+  <line x1="20" y1="40" x2="50" y2="40" stroke="black" stroke-width="3"/>
+</svg> -->
+<svg viewBox="15 15 40 50" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" preserveAspectRatio="xMidYMid meet" width="30" height="30">
+  <!-- Рамка с закруглёнными углами -->
+  <rect x="15" y="15" width="40" height="50" rx="6" ry="6" fill="none"  stroke-width="3"/>
+  
+  <!-- Крестик (отмена) в центре -->
+  <line x1="22" y1="32" x2="48" y2="48"  stroke-width="3"/>
+  <line x1="48" y1="32" x2="22" y2="48"  stroke-width="3"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg viewBox="15 15 40 50" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" width="30" height="30">
+  <!-- Вертикальная линия -->
+  <line x1="35" y1="20" x2="35" y2="60" stroke="black" stroke-width="3"/>
+
+  <!-- Плюсик слева -->
+  <line x1="30" y1="40" x2="20" y2="40" stroke="black" stroke-width="3"/>
+  <line x1="25" y1="35" x2="25" y2="45" stroke="black" stroke-width="3"/>
+  
+  <!-- 6 горизонтальных линий справа равномерно распределённые -->
+  <line x1="35" y1="20" x2="55" y2="20" stroke="black" stroke-width="2"/>
+  <line x1="35" y1="28" x2="55" y2="28" stroke="black" stroke-width="2"/>
+  <line x1="35" y1="36" x2="55" y2="36" stroke="black" stroke-width="2"/>
+  <line x1="35" y1="44" x2="55" y2="44" stroke="black" stroke-width="2"/>
+  <line x1="35" y1="52" x2="55" y2="52" stroke="black" stroke-width="2"/>
+  <line x1="35" y1="60" x2="55" y2="60" stroke="black" stroke-width="2"/>
+</svg>

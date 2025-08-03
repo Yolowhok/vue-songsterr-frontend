@@ -1,0 +1,29 @@
+<script setup>
+import { defineProps } from "vue";
+
+const width = 100;
+const height = 100;
+const props = defineProps({
+  points: {
+    type: Object,
+  },
+});
+</script>
+
+<template lang="pug">
+    svg(
+    :width="width"
+    :height="height"
+    viewBox="0 0 100 150"
+    xmlns="http://www.w3.org/2000/svg"
+    )
+        line(x1="55" y1="20" x2="55" y2="130" stroke="black" stroke-width="2")
+        line(:x1="props.points.x1" y1="126" :x2="props.points.x2" y2="126" stroke="black" stroke-width="8")
+        line(:x1="props.points.x1" y1="110" :x2="props.points.x2" y2="110" stroke="black" stroke-width="8")
+        line(:x1="props.points.x1" y1="94" :x2="props.points.x2" y2="94" stroke="black" stroke-width="8")
+
+        //- line(x1="-100" y1="110" x2="250" y2="110" stroke="black" stroke-width="8")
+        //- line(x1="-100" y1="94" x2="250" y2="94" stroke="black" stroke-width="8")
+        //- line(x1="0" y1="78" x2="150" y2="78" stroke="black" stroke-width="8")
+
+</template>
