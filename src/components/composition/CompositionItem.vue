@@ -81,9 +81,7 @@ async function loadComposition(id) {
   width: 20%;
   text-align: center;
 }
-.v2 {
-  /* width: 80%; */
-}
+
 /* Стили для элемента списка */
 .composition-item {
   padding: 1rem;
