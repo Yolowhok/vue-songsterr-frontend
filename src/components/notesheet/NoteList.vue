@@ -24,8 +24,6 @@ const props = defineProps({
 
 const store = useMyStore();
 
-watch(() => store.notesheets);
-
 function getNoteValue(numberString) {
   // Добавляем проверку на существование beatNotes
   if (!props.beat?.beatNotes) return { id: 0 };

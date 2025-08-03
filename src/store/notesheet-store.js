@@ -22,6 +22,9 @@ export const newStore = defineStore("newStore", {
     composition: [],
     chosenNotesheet: 0,
     chosenComposition: {},
+    fretboard: [],
+    noteOctaveOrdered: [],
+    durations: [],
     isLoading: false,
     settings: {
       orientation: "nowrap",
@@ -50,6 +53,9 @@ export const newStore = defineStore("newStore", {
     getOrientation: (state) => {
       return state.settings.orientation;
     },
+    getNoteOctavesOrdered: (state) => state.noteOctaveOrdered,
+    getFretboard: (state) => state.fretboard,
+    getDuration: (state) => state.durations,
     isCompositionListEmpty: (state) => {
       return (
         Array.isArray(state.compositionList) &&
@@ -79,7 +85,21 @@ export const newStore = defineStore("newStore", {
         console.error("Ошибка при загрузке notesheets", e);
       }
     },
-
+    async fetchNoteOctaveOrdered() {
+      try {
+        const response = await getNoteOctavesOrdered();
+        this.noteOctaveOrdered = response;
+      } catch (e) {}
+    },
+    async fetchDuration() {
+      this.durations = null;
+      this.durations = await getDurations();
+    },
+    setFretboard() {
+      this.fretboard = null;
+      const fretboardData = getFretboard();
+      this.fretboard = fretboardData;
+    },
     toggleOrientation() {
       this.settings.orientation =
         this.settings.orientation === "wrap" ? "nowrap" : "wrap";
@@ -95,6 +115,239 @@ export const newStore = defineStore("newStore", {
     setChosenComposition(composition) {
       console.log(composition);
       this.chosenComposition = composition;
+    },
+    deleteNote(barOrderIndex, beatOrderIndex, noteValue) {
+      const currentNoteSheet =
+        this.getComposition?.notesheets[this.chosenNotesheet];
+
+      console.log(currentNoteSheet);
+      // const currentNoteSheet = this.notesheets.notesheets[this.notesheetChoise];
+      if (!currentNoteSheet) {
+        console.warn("Notesheet not found");
+        return;
+      }
+
+      // Найти нужный bar по barId
+      const bar = currentNoteSheet.bars.find(
+        (bar) => bar.orderIndex === barOrderIndex
+      );
+      if (!bar) {
+        console.warn("Bar not found");
+        return;
+      }
+
+      // Найти нужный beat внутри bar
+      const beat = bar.beats.find((beat) => beat.orderIndex === beatOrderIndex);
+      if (!beat) {
+        console.warn("Beat not found");
+        return;
+      }
+      const beatNote = beat.beatNotes.find(
+        (beatNote) => beatNote.position.string === noteValue.position.string
+      );
+      const index = beat.beatNotes.findIndex(
+        (beatNote) => beatNote.position.string === noteValue.position.string
+      );
+
+      if (index !== -1) {
+        beat.beatNotes.splice(index, 1);
+        console.log("Deleted beatNote", beatNote);
+      } else {
+        console.warn("beatNote не найден");
+      }
+    },
+    updateNoteValue(barOrderIndex, beatOrderIndex, newValue) {
+      const currentNoteSheet =
+        this.getComposition?.notesheets[this.chosenNotesheet];
+
+      if (!currentNoteSheet) {
+        console.warn("Notesheet not found");
+        return;
+      }
+
+      // Найти нужный bar по barId
+      const bar = currentNoteSheet.bars.find(
+        (bar) => bar.orderIndex === barOrderIndex
+      );
+      if (!bar) {
+        console.warn("Bar not found");
+        return;
+      }
+
+      // Найти нужный beat внутри bar
+      const beat = bar.beats.find((beat) => beat.orderIndex === beatOrderIndex);
+      if (!beat) {
+        console.warn("Beat not found");
+        return;
+      }
+
+      const beatsNote = beat.beatNotes.find(
+        (beatNote) => beatNote.position.string === newValue.position.string
+      );
+
+      beatsNote.noteOctave = newValue.noteOctave;
+      beatsNote.position = newValue.position;
+    },
+    addNote(barOrderIndex, beatOrderIndex, newValue) {
+      const currentNoteSheet =
+        this.getComposition?.notesheets[this.chosenNotesheet];
+
+      if (!currentNoteSheet) {
+        console.warn("Notesheet not found");
+        return;
+      }
+
+      const bar = currentNoteSheet.bars.find(
+        (bar) => bar.orderIndex === barOrderIndex
+      );
+      if (!bar) {
+        console.warn("Bar not found");
+        return;
+      }
+
+      const beat = bar.beats.find((beat) => beat.orderIndex === beatOrderIndex);
+      if (!beat) {
+        console.warn("Beat not found");
+        return;
+      }
+
+      beat.beatNotes.push(newValue);
+    },
+    checkDurations(barOrderIndex, beatOrderIndex, name) {
+      const currentNoteSheet =
+        this.getComposition?.notesheets[this.chosenNotesheet];
+
+      if (!currentNoteSheet) {
+        console.warn("Notesheet not found");
+        return;
+      }
+
+      // Найти нужный bar по barOrderIndex
+      const bar = currentNoteSheet.bars.find(
+        (bar) => bar.orderIndex === barOrderIndex
+      );
+      if (!bar) {
+        console.warn("Bar not found");
+        return;
+      }
+
+      // Найти индекс текущего бита в массиве битов бара
+      const beats = bar.beats;
+
+      // Найти текущий beat по beatOrderIndex (параметру функции)
+      const currentBeat = beats.find(
+        (beat) => beat.orderIndex === beatOrderIndex
+      );
+      if (!currentBeat) {
+        console.warn("Current beat not found");
+        return;
+      }
+
+      let x1 = 55;
+      let x2 = 90;
+
+      // Найти следующий beat с orderIndex + 1
+      const nextBeat = beats.find(
+        (beat) => beat.orderIndex === beatOrderIndex + 1
+      );
+      const prevBeat = beats.find(
+        (beat) => beat.orderIndex === beatOrderIndex - 1
+      );
+
+      if (nextBeat && nextBeat.duration?.name == name) {
+        x2 = 250;
+      } else if (prevBeat && prevBeat.duration?.name == name) {
+        x2 = 55;
+      }
+      if (nextBeat == undefined) {
+        x2 = 90;
+      }
+      // Найти предыдущий beat с orderIndex - 1
+
+      if (prevBeat == undefined) {
+      }
+      if (prevBeat && prevBeat.duration?.name == name) {
+        x1 = -100;
+        if (nextBeat == undefined) {
+          x2 = 55;
+        }
+      }
+
+      return { x1, x2 };
+    },
+    setDurationForBeat(barOrderIndex, beatOrderIndex, value) {
+      this.durations.data.forEach((duration) => {
+        const finalDuration = this.durations.data.find((d) => d.name === value);
+        const currentNoteSheet =
+          this.getComposition?.notesheets[this.chosenNotesheet];
+
+        if (!currentNoteSheet) {
+          console.warn("Notesheet not found");
+          return;
+        }
+
+        // Найти нужный bar по barId
+        const bar = currentNoteSheet.bars.find(
+          (bar) => bar.orderIndex === barOrderIndex
+        );
+        if (!bar) {
+          console.warn("Bar not found");
+          return;
+        }
+
+        // Найти нужный beat внутри bar
+        const beat = bar.beats.find(
+          (beat) => beat.orderIndex === beatOrderIndex
+        );
+        if (!beat) {
+          console.warn("Beat not found");
+          return;
+        }
+        beat.duration = finalDuration;
+        // console.log(beat, finalDuration);
+        // console.log(barOrderIndex, beatOrderIndex, value);
+      });
+    },
+    deleteBeat(barOrderIndex, beatOrderIndex) {
+      console.log(
+        "barOrderIndex, beatOrderIndexbarOrderIndex, beatOrderIndexbarOrderIndex, beatOrderIndexbarOrderIndex, beatOrderIndexbarOrderIndex, beatOrderIndex",
+        barOrderIndex,
+        beatOrderIndex
+      );
+      console.log("barOrderIndex, beatOrderIndex");
+      const currentNoteSheet =
+        this.getComposition?.notesheets[this.chosenNotesheet];
+
+      if (!currentNoteSheet) {
+        console.warn("Notesheet not found");
+        return;
+      }
+
+      // Найти нужный bar по barOrderIndex
+      const bar = currentNoteSheet.bars.find(
+        (bar) => bar.orderIndex === barOrderIndex
+      );
+      if (!bar) {
+        console.warn("Bar not found");
+        return;
+      }
+
+      // Найти индекс beat в массиве beats
+      const beatIndex = bar.beats.findIndex(
+        (beat) => beat.orderIndex === beatOrderIndex
+      );
+      if (beatIndex === -1) {
+        console.warn("Beat not found");
+        return;
+      }
+
+      // Удаляем beat из массива
+      bar.beats.splice(beatIndex, 1);
+
+      // Смещаем orderIndex у последующих beat
+      for (let i = beatIndex; i < bar.beats.length; i++) {
+        bar.beats[i].orderIndex = bar.beats[i].orderIndex - 1;
+      }
     },
   },
 });

@@ -14,6 +14,7 @@ const compositionsList = computed(() => store.getCompositionList);
       div.header 
         h1.text СПИСОК ТАБОВ 
         div.input-container
+            div.container-for-input
               input.search-input(type="text",
                                 placeholder="Поиск...",
                                 @focus="isFocused = true",
@@ -45,6 +46,7 @@ const compositionsList = computed(() => store.getCompositionList);
 }
 .header {
   flex-shrink: 0; /* Не сжимается */
+  height: 6vh;
 
   display: flex;
   flex-direction: row;
@@ -91,6 +93,7 @@ const compositionsList = computed(() => store.getCompositionList);
 
 .search-input {
   padding: 0.8rem 1rem 0.8rem 3rem;
+
   border: 2px solid #e0e0e0;
   border-radius: 50px;
   outline: none;
@@ -157,6 +160,39 @@ const compositionsList = computed(() => store.getCompositionList);
     font-family: "Roboto Mono", monospace;
     color: #37474f;
     line-height: 1.5;
+  }
+}
+@media (max-aspect-ratio: 3/4) {
+  .header {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+  .container {
+    padding-top: 15%;
+  }
+  .input-container {
+    align-items: center;
+    width: 100%;
+  }
+  input {
+    width: 50%;
+    padding: 0px;
+  }
+  .container-for-input {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+  }
+  .search-icon {
+    display: none;
   }
 }
 </style>

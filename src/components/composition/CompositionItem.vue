@@ -18,7 +18,7 @@ const composition = ref(props.composition);
 const index = ref(props.index);
 
 async function loadComposition(id) {
-  // store.fetchComposition(id);
+  store.fetchComposition(id);
   store.setChosenNotesheet(0);
   router.push(`/composition/` + id + `/notesheet/` + store.getChosenNotesheet);
   // if (props.composition && props.composition.id) {r
@@ -41,13 +41,13 @@ async function loadComposition(id) {
 
       div(v-if="composition && composition?.id")
 
-          div(:id="composition.id" @click="loadComposition(composition?.id)").composition-item.composition
+          div(:id="composition?.id" @click="loadComposition(composition?.id)").composition-item.composition
             div.v0
               div.v1
                 div.band-name {{index+1}}.
               div.v2
-                div.band-name {{composition.band}}
-                div.song-title {{composition.title}}
+                div.band-name {{composition?.band}}
+                div.song-title {{composition?.title}}
 
       
 </template>
@@ -82,12 +82,10 @@ async function loadComposition(id) {
   text-align: center;
 }
 .v2 {
-  width: 80%;
+  /* width: 80%; */
 }
 /* Стили для элемента списка */
 .composition-item {
-  /* width: 80%; */
-
   padding: 1rem;
   background-color: #fff;
 
@@ -96,7 +94,7 @@ async function loadComposition(id) {
 
   color: var(--text);
   cursor: pointer;
-  /* display: flex; */
+
   padding: 8px 30px 8px 0;
   z-index: 100;
 }
@@ -109,7 +107,10 @@ async function loadComposition(id) {
 
 /* Стили для названия группы */
 .band-name {
-  font-size: 1.5rem; /* Крупный шрифт */
+  /* font-size: 1.5rem;  */
+  font-size: clamp(14px, calc(1vw + 1vh), 100px);
+
+  /* Крупный шрифт */
   font-weight: 550;
 
   color: #2c3e50; /* Цвет текста */
@@ -118,7 +119,9 @@ async function loadComposition(id) {
 
 /* Стили для названия песни */
 .song-title {
-  font-size: 1.2rem; /* Размер шрифта */
+  font-size: clamp(14px, calc(1vw + 1vh), 100px);
+  /* font-size: 1.2rem; */
+  /* Размер шрифта */
   font-weight: 200;
   color: #34495e;
 }

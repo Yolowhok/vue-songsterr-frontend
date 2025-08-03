@@ -7,6 +7,9 @@ import { newStore } from "./store/notesheet-store";
 const store = newStore();
 onBeforeMount(async () => {
   await store.fetchCompositionList();
+  await store.fetchNoteOctaveOrdered();
+  await store.fetchDuration();
+  console.log("store.getDuration", store.getDuration);
 });
 </script>
 

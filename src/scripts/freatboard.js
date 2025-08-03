@@ -1,10 +1,13 @@
-import { getNoteOctavesOrdered } from "../api/notesAPI";
 import { useMyStore } from "../store/notesheet-store";
-export function getFretboard() {
-  const store = useMyStore();
-  const notes = store.noteOctaveOrdered;
+import { newStore } from "../store/notesheet-store";
 
-  const tuning = store.notesheets?.notesheets[store.notesheetChoise]?.tuning;
+export function getFretboard() {
+  const store = newStore();
+  const oldStore = useMyStore();
+  const notes = store.getNoteOctavesOrdered;
+
+  const tuning =
+    store.getComposition?.notesheets[store.getChosenNotesheet]?.tuning;
 
   const stringsMax = 6;
   const fretMax = 24;

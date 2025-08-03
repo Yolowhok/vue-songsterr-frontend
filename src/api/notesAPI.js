@@ -1,13 +1,14 @@
 import axios from "axios";
+import api from "./api";
 
 export function getNotes() {
-  return axios.get("http://localhost:8080/static/notes");
+  return api.get("/static/notes");
 }
 
 export function getOctaves() {
-  return axios.get("http://localhost:8080/static/octaves");
+  return api.get("/static/octaves");
 }
 
 export function getNoteOctavesOrdered() {
-  return axios.get("http://localhost:8080/static/noteoctaves/ordered");
+  return api.get("/static/noteoctaves/ordered");
 }

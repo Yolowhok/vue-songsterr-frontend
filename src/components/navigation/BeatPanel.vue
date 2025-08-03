@@ -103,6 +103,7 @@ import ThirtySecond from "../../assets/THIRTY_SECOND.svg";
 import SixtyFour from "../../assets/SIXTY_FOUR.svg";
 import trash from "../../assets/trash1.svg";
 import eventBus from "../../eventBus";
+import { newStore } from "../../store/notesheet-store";
 
 const props = defineProps({
   barOrderIndex: Number,
@@ -110,22 +111,20 @@ const props = defineProps({
 });
 
 const storePinia = useMyStore();
+const store = newStore();
 
 function addBarRight() {
   console.log("da");
 }
 
 function onClick(name) {
-  storePinia.setDurationForBeat(
-    props.barOrderIndex,
-    props.beatOrderIndex,
-    name
-  );
+  store.setDurationForBeat(props.barOrderIndex, props.beatOrderIndex, name);
   eventBus.emit("update-all-beats");
 }
 function deleteBeat() {
-  storePinia.deleteBeat(props.barOrderIndex, props.beatOrderIndex);
-  console.log("deleteBeat");
+  console.log(props.barOrderIndex, props.beatOrderIndex);
+  store.deleteBeat(props.barOrderIndex, props.beatOrderIndex);
+
   eventBus.emit("update-all-beats");
 }
 </script>

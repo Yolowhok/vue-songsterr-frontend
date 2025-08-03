@@ -77,7 +77,9 @@ header.header(ref="headerRef")
 .material-symbols-outlined:hover {
   color: #000000;
 }
-
+.navigation {
+  padding-left: 0px;
+}
 .action-btn:hover:not(:disabled) {
   transform: translateY(-2px);
 }

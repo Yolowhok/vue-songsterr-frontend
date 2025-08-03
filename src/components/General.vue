@@ -2,9 +2,9 @@
 import Navigation from "./navigation/Navigation.vue";
 import ToolsFooter from "./navigation/ToolsFooter.vue";
 import Modal from "./navigation/Modal.vue";
-import { computed } from "vue";
+import { computed, onBeforeMount } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
+import { newStore } from "../store/notesheet-store";
 const route = useRoute();
 const router = useRouter();
 
@@ -15,8 +15,6 @@ const isModalVisible = computed(() => route.meta.requiresModal || false);
 const handleModalClose = () => {
   router.go(-1);
 };
-
-// Открытие конкретного модального пути
 </script>
 
 <template lang="pug">

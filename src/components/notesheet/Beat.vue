@@ -1,9 +1,10 @@
 <script setup>
-import { defineProps, onMounted, ref, watchEffect } from "vue";
+import { defineProps, onMounted, ref, watchEffect, markRaw } from "vue";
 import NoteList from "./NoteList.vue";
 import { useMyStore } from "../../store/notesheet-store";
 import BeatPanel from "../navigation/BeatPanel.vue";
-import TrashIcon from "../../assets/menuLines.svg"; // или '../assets/logo.svg' в зависимости от структуры
+import TrashIcon from "../../assets/menuLines.svg";
+// или '../assets/logo.svg' в зависимости от структуры
 import Eigth from "../SvgComponents/Eigth.vue";
 import Quarter from "../SvgComponents/Quart.vue";
 
@@ -14,7 +15,9 @@ import Half from "../SvgComponents/Half.vue";
 import SixtyFour from "../SvgComponents/SixtyFour.vue";
 import { watch } from "vue";
 import eventBus from "../../eventBus";
+import { newStore } from "../../store/notesheet-store";
 
+const store = newStore();
 const props = defineProps({
   beat: Object,
   orderIndex: Number,
@@ -23,7 +26,7 @@ const props = defineProps({
   beatOrderIndex: Number,
 });
 
-const store = useMyStore();
+const oldStore = useMyStore();
 
 const isHovered = ref(false);
 
@@ -57,94 +60,108 @@ function updateSvgComponent(val) {
       svgProps.value = {};
       break;
     case "HALF":
-      SvgComponent.value = Half;
+      SvgComponent.value = markRaw(Half);
       svgProps.value = points;
       break;
     case "QUARTER":
-      SvgComponent.value = Quarter;
+      SvgComponent.value = markRaw(Quarter);
       svgProps.value = points;
       break;
     case "EIGHTH":
-      SvgComponent.value = Eigth;
+      SvgComponent.value = markRaw(Eigth);
       svgProps.value = points;
       break;
     case "SIXTEENTH":
-      SvgComponent.value = Sixteenth;
+      SvgComponent.value = markRaw(Sixteenth);
       svgProps.value = points;
       break;
     case "THIRTY_SECOND":
-      SvgComponent.value = ThirtySeconds;
+      SvgComponent.value = markRaw(ThirtySeconds);
       svgProps.value = points;
       break;
     case "SIXTY_FOUR":
-      SvgComponent.value = SixtyFour;
+      SvgComponent.value = markRaw(SixtyFour);
       svgProps.value = points;
       break;
   }
 }
-// const durationName = computed(() => props.beat?.duration?.name);
+const durationName = computed(() => props.beat?.duration?.name);
 
-// watch(
-//   durationName,
-//   (newVal) => {
-//     if (newVal) {
-//       updateSvgComponent(newVal);
-//       eventBus.emit("update-all-beats");
-//     }
-//   },
-//   { immediate: true }
-// );
+watch(
+  durationName,
+  (newVal) => {
+    if (newVal) {
+      updateSvgComponent(newVal);
+      eventBus.emit("update-all-beats");
+    }
+  },
+  { immediate: true }
+);
 
-// watch(
-//   () => props.beat?.duration?.name,
-//   (newVal) => {
-//     updateSvgComponent(newVal);
-//     eventBus.emit("update-all-beats");
-//   },
-//   { immediate: true }
-// );
+watch(
+  () => props.beat?.duration?.name,
+  (newVal) => {
+    updateSvgComponent(newVal);
+    eventBus.emit("update-all-beats");
+  },
+  { immediate: true }
+);
 
-// eventBus.on("update-all-beats", () => {
-//   updateSvgComponent(props.beat?.duration?.name);
-// });
+eventBus.on("update-all-beats", () => {
+  updateSvgComponent(props.beat?.duration?.name);
+});
 
-// const val = computed(
-//   () => props.beat?.duration?.name,
-//   () => {
-//     console.log("DADADAAd");
-//     if (val) updateSvgComponent(val);
-//   }
-// );
+const val = computed(
+  () => props.beat?.duration?.name,
+  () => {
+    console.log("DADADAAd");
+    if (val) updateSvgComponent(val);
+  }
+);
 
-// onMounted(() => {
-//   const val = props.beat?.duration?.name;
-//   if (val) {
-//     updateSvgComponent(val);
-//     eventBus.emit("update-all-beats");
-//   }
-// });
+onMounted(() => {
+  const val = props.beat?.duration?.name;
+  if (val) {
+    updateSvgComponent(val);
+    eventBus.emit("update-all-beats");
+  }
+});
 </script>
 
 <template lang="pug">
-div.beat-wrapper( @mouseenter="isHovered = true"  @mouseleave="onMouseLeave" style="position: relative;" )
-  div.beat
-    NoteList(:beat="props.beat"
-      :orderIndex="props.orderIndex"
-      :barId="props.barId"
-      :beatId="props.beatId"
-      :beatOrderIndex="props.beatOrderIndex")
-  //- div
-  //-   TrashIcon.add-button.logo(@click="togglePanel" v-if="isHovered" viewBox="0 0 24 24" width="24" height="24" )
-  //-   div.popup-panel(v-if="showPanel"  @click="close")
-  //-       BeatPanel(:barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
 
-  //- component.eigth-svg(v-if="SvgComponent" :is="SvgComponent" :points="svgProps")
+  div.beat-wrapper( @mouseenter="isHovered = true"  @mouseleave="onMouseLeave" style="position: relative;" )
+    div.transparent-overlay
+    div.beat
+      NoteList(:beat="props.beat"
+        :orderIndex="props.orderIndex"
+        :barId="props.barId"
+        :beatId="props.beatId"
+        :beatOrderIndex="props.beatOrderIndex")
+    div
+      TrashIcon.add-button.logo(@click="togglePanel" v-if="isHovered" viewBox="0 0 24 24" width="24" height="24" )
+      div.popup-panel(v-if="showPanel"  @click="close")
+          BeatPanel(:barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
+
+    component.eigth-svg(v-if="SvgComponent" :is="SvgComponent" :points="svgProps")
 
 
 
 </template>
 
 <style scoped>
+.transparent-overlay {
+  position: absolute;
+  top: -50%;
+  bottom: -50%;
+  left: 0;
+  right: 0;
+  background: transparent; /* Прозрачный фон */
+  z-index: -1; /* Чтобы не перекрывать контент */
+  /* pointer-events: none; */
+  /* Клики проходят сквозь него */
+  border: 1px dashed rgba(0, 0, 255, 0.3); /* Для визуализации (можно убрать) */
+}
 .eigth-svg {
   position: absolute;
   top: 110%; /* сразу под beat-wrapper */

@@ -11,9 +11,6 @@ const bars = computed(
 
 `position: absolute;
     padding-left: 100px;`;
-bars.value.forEach((bar) => {
-  console.log(bar);
-});
 
 const orientation = computed(() => store.settings.orientation);
 // const bars = computed(() => store)
