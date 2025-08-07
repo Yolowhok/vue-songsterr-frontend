@@ -18,12 +18,21 @@ const isLoading = ref(true);
 //     isLoading.value = false;
 //   }
 // });
-onMounted(async () => {
-  store.setChosenComposition(store.getCompositionById(route.params.id));
 
+onMounted(async () => {
   try {
+    console.log("route.params.id in composition ", route.params.id);
     await store.fetchComposition(route.params.id);
+    await store.fetchNoteOctaveOrdered();
+
+    await store.fetchCompositionList();
+    await store.fetchDuration();
+
     store.setFretboard();
+    store.setChosenNotesheet(route.params.num);
+    store.setChosenComposition(store.getCompositionById(route.params.id));
+    store.fetchComposition(route.params.id);
+
     console.log(store.getFretboard);
 
     // Перенесем таймаут ПЕРЕД finally

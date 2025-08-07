@@ -18,8 +18,8 @@ const composition = ref(props.composition);
 const index = ref(props.index);
 
 async function loadComposition(id) {
-  store.fetchComposition(id);
-  store.setChosenNotesheet(0);
+  // store.setChosenNotesheet(0);
+
   router.push(`/composition/` + id + `/notesheet/` + store.getChosenNotesheet);
   // if (props.composition && props.composition.id) {r
   //   store.fetchCompositionNotesheet(props.composition.id);

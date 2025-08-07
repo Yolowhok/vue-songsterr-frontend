@@ -25,6 +25,7 @@ export const newStore = defineStore("newStore", {
     fretboard: [],
     noteOctaveOrdered: [],
     durations: [],
+    points: [],
     isLoading: false,
     settings: {
       orientation: "nowrap",
@@ -56,6 +57,7 @@ export const newStore = defineStore("newStore", {
     getNoteOctavesOrdered: (state) => state.noteOctaveOrdered,
     getFretboard: (state) => state.fretboard,
     getDuration: (state) => state.durations,
+    getPoints: (state) => state.points,
     isCompositionListEmpty: (state) => {
       return (
         Array.isArray(state.compositionList) &&
@@ -73,6 +75,7 @@ export const newStore = defineStore("newStore", {
       try {
         const response = await getCompositions();
         this.compositionList = response.data; // устанавливаем в state
+        console.log("Composition list is load");
       } catch (e) {
         console.error("Ошибка при загрузке композиций", e);
       }
@@ -81,6 +84,7 @@ export const newStore = defineStore("newStore", {
       try {
         const response = await getCompositionByIdFull(id);
         this.composition = response.data; // устанавливаем в state
+        console.log("Composition is load");
       } catch (e) {
         console.error("Ошибка при загрузке notesheets", e);
       }
@@ -89,11 +93,13 @@ export const newStore = defineStore("newStore", {
       try {
         const response = await getNoteOctavesOrdered();
         this.noteOctaveOrdered = response;
+        console.log("NoteOctaveOrdered is load");
       } catch (e) {}
     },
     async fetchDuration() {
       this.durations = null;
       this.durations = await getDurations();
+      console.log("Duration is load");
     },
     setFretboard() {
       this.fretboard = null;
@@ -106,10 +112,15 @@ export const newStore = defineStore("newStore", {
       console.log("Orientation changed to:", this.settings.orientation);
     },
     setChosenNotesheet(index) {
-      if (index >= 0 && index < this.compositionList.length) {
-        this.chosenNotesheet = index;
-      } else {
-        console.warn("Invalid notesheet index:", index);
+      try {
+        const num = Number.parseInt(index);
+        if (num >= 0 && num < this.composition.notesheets.length) {
+          this.chosenNotesheet = num;
+        } else {
+          console.warn("Invalid notesheet index:", num);
+        }
+      } catch (e) {
+        console.log("Type error");
       }
     },
     setChosenComposition(composition) {
@@ -213,9 +224,83 @@ export const newStore = defineStore("newStore", {
 
       beat.beatNotes.push(newValue);
     },
+    checkAllDurations(beats, timeSignature) {
+      if (!beats) {
+        console.warn("Notesheet not found");
+      }
+      const quartDuration = 0.25;
+
+      const beatsPoints = [];
+
+      beats.forEach((beat, index) => {
+        beatsPoints.push({ x1: 55, x2: 90 });
+        let currentBeat = beat;
+        let nextBeat = beats[index + 1];
+        let prevBeat = beats[index - 1];
+
+        if (
+          (currentBeat?.duration?.durationValue ==
+            prevBeat?.duration?.durationValue ||
+            currentBeat?.duration?.durationValue ==
+              prevBeat?.duration?.durationValue) &&
+          prevBeat?.duration?.durationValue != 0.25
+        ) {
+          beatsPoints[index].x1 = -100;
+        }
+        if (
+          (currentBeat?.duration?.durationValue ==
+            nextBeat?.duration?.durationValue ||
+            currentBeat?.duration?.durationValue ==
+              nextBeat?.duration?.durationValue) &&
+          nextBeat?.duration?.durationValue != 0.25
+        ) {
+          beatsPoints[index].x2 = 250;
+        }
+        if (
+          !nextBeat &&
+          prevBeat?.duration?.durationValue ==
+            currentBeat?.duration?.durationValue
+        ) {
+          beatsPoints[index].x2 = 55;
+        }
+        if (
+          nextBeat?.duration?.durationValue !=
+            currentBeat?.duration?.durationValue &&
+          currentBeat?.duration?.durationValue ==
+            prevBeat?.duration?.durationValue
+        ) {
+          beatsPoints[index].x2 = 55;
+        }
+
+        // if (
+        //   currentBeat?.duration?.durationValue <=
+        //     prevBeat?.duration?.durationValue &&
+        //   prevBeat?.duration?.durationValue != 0.25
+        // ) {
+        //   beatsPoints[index].x1 = -100;
+        // }
+        // if (
+        //   currentBeat?.duration?.durationValue <=
+        //     nextBeat?.duration?.durationValue &&
+        //   nextBeat?.duration?.durationValue != 0.25
+        // ) {
+        //   beatsPoints[index].x2 = 250;
+        // }
+        // if (
+        //   !nextBeat &&
+        //   prevBeat?.duration?.durationValue ==
+        //     currentBeat?.duration?.durationValue
+        // ) {
+        //   beatsPoints[index].x2 = 55;
+        // }
+      });
+      this.points = beatsPoints;
+      return beatsPoints;
+    },
     checkDurations(barOrderIndex, beatOrderIndex, name) {
       const currentNoteSheet =
         this.getComposition?.notesheets[this.chosenNotesheet];
+      console.log("CHANGE DURATION WIDTH", barOrderIndex, beatOrderIndex, name);
 
       if (!currentNoteSheet) {
         console.warn("Notesheet not found");
@@ -239,7 +324,12 @@ export const newStore = defineStore("newStore", {
         (beat) => beat.orderIndex === beatOrderIndex
       );
       if (!currentBeat) {
-        console.warn("Current beat not found");
+        console.warn(
+          "Current beat not found",
+          barOrderIndex,
+          beatOrderIndex,
+          name
+        );
         return;
       }
 
@@ -309,44 +399,44 @@ export const newStore = defineStore("newStore", {
       });
     },
     deleteBeat(barOrderIndex, beatOrderIndex) {
-      console.log(
-        "barOrderIndex, beatOrderIndexbarOrderIndex, beatOrderIndexbarOrderIndex, beatOrderIndexbarOrderIndex, beatOrderIndexbarOrderIndex, beatOrderIndex",
-        barOrderIndex,
-        beatOrderIndex
-      );
-      console.log("barOrderIndex, beatOrderIndex");
-      const currentNoteSheet =
-        this.getComposition?.notesheets[this.chosenNotesheet];
+      try {
+        const currentNoteSheet =
+          this.getComposition?.notesheets[this.chosenNotesheet];
 
-      if (!currentNoteSheet) {
-        console.warn("Notesheet not found");
-        return;
-      }
+        if (!currentNoteSheet) {
+          console.warn("Notesheet not found");
+          return;
+        }
 
-      // Найти нужный bar по barOrderIndex
-      const bar = currentNoteSheet.bars.find(
-        (bar) => bar.orderIndex === barOrderIndex
-      );
-      if (!bar) {
-        console.warn("Bar not found");
-        return;
-      }
+        // Найти нужный bar по barOrderIndex
+        const bar = currentNoteSheet.bars.find(
+          (bar) => bar.orderIndex === barOrderIndex
+        );
+        if (!bar) {
+          console.warn("Bar not found");
+          return;
+        }
 
-      // Найти индекс beat в массиве beats
-      const beatIndex = bar.beats.findIndex(
-        (beat) => beat.orderIndex === beatOrderIndex
-      );
-      if (beatIndex === -1) {
-        console.warn("Beat not found");
-        return;
-      }
+        // Найти индекс beat в массиве beats
+        const beatIndex = bar.beats.findIndex(
+          (beat) => beat.orderIndex === beatOrderIndex
+        );
+        if (beatIndex === -1) {
+          console.warn("Beat not found");
+          return;
+        }
 
-      // Удаляем beat из массива
-      bar.beats.splice(beatIndex, 1);
+        // Удаляем beat из массива
+        bar.beats.splice(beatIndex, 1);
 
-      // Смещаем orderIndex у последующих beat
-      for (let i = beatIndex; i < bar.beats.length; i++) {
-        bar.beats[i].orderIndex = bar.beats[i].orderIndex - 1;
+        // Смещаем orderIndex у последующих beat
+        for (let i = beatIndex; i < bar.beats.length; i++) {
+          bar.beats[i].orderIndex = bar.beats[i].orderIndex - 1;
+        }
+      } catch (error) {
+        console.log("error delete beat: ", error);
+      } finally {
+        console.log("deleteBeat done");
       }
     },
   },

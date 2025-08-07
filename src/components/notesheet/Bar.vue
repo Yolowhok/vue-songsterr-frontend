@@ -77,6 +77,8 @@ const showBarSize = computed(() => {
   // console.log(props.bar)
   // return currTS.upper != prevTS.upper || currTS.lower != prevTS.lower
 })
+onMounted(() => {
+})
 </script>
 
 <template lang="pug">
@@ -91,7 +93,7 @@ const showBarSize = computed(() => {
 
         div.lines
             div.value
-                BeatList(:beats="bar.beats" :orderIndex = "props.orderIndex" :barId="props.bar?.id")
+                BeatList(:beats="bar.beats" :orderIndex = "props.orderIndex" :barId="props.bar?.id" :timeSignature="props?.bar?.timeSignature")
             Lines.lines-content
 
         div.duration(@mouseleave="onMouseLeave") 

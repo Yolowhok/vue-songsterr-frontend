@@ -1,5 +1,12 @@
 <script setup>
-import { defineProps, onMounted, ref, watchEffect, markRaw } from "vue";
+import {
+  defineProps,
+  onMounted,
+  ref,
+  watchEffect,
+  markRaw,
+  onBeforeMount,
+} from "vue";
 import NoteList from "./NoteList.vue";
 import { useMyStore } from "../../store/notesheet-store";
 import BeatPanel from "../navigation/BeatPanel.vue";
@@ -24,6 +31,7 @@ const props = defineProps({
   barId: Number,
   beatId: Number,
   beatOrderIndex: Number,
+  points: Object,
 });
 
 const oldStore = useMyStore();
@@ -47,13 +55,22 @@ function close() {
 
 const SvgComponent = ref(null);
 const svgProps = ref({});
-// Вынесите логику обновления в отдельную функцию
+
 function updateSvgComponent(val) {
-  const points = store.checkDurations(
-    props.orderIndex,
-    props.beatOrderIndex,
-    val
-  );
+  // const points = store.checkDurations(
+  //   props.orderIndex,
+  //   props.beatOrderIndex,
+  //   val
+  // );
+  // const pointsMock = store.checkAllDurations(
+  //   props.orderIndex,
+  //   props.beatOrderIndex
+  // );
+
+  const points = store.getPoints[props.beatOrderIndex - 1];
+  console.log(points);
+  //{ x1: 55, x2: 90 };
+
   switch (val) {
     case "WHOLE":
       SvgComponent.value = null;
@@ -85,47 +102,115 @@ function updateSvgComponent(val) {
       break;
   }
 }
-const durationName = computed(() => props.beat?.duration?.name);
-
-watch(
-  durationName,
-  (newVal) => {
-    if (newVal) {
-      updateSvgComponent(newVal);
-      eventBus.emit("update-all-beats");
-    }
-  },
-  { immediate: true }
-);
-
-watch(
-  () => props.beat?.duration?.name,
-  (newVal) => {
-    updateSvgComponent(newVal);
-    eventBus.emit("update-all-beats");
-  },
-  { immediate: true }
-);
 
 eventBus.on("update-all-beats", () => {
+  // console.log(props);
+
   updateSvgComponent(props.beat?.duration?.name);
 });
 
-const val = computed(
-  () => props.beat?.duration?.name,
-  () => {
-    console.log("DADADAAd");
-    if (val) updateSvgComponent(val);
-  }
-);
+const durationName = computed(() => props.beat?.duration?.name);
 
-onMounted(() => {
+// if (durationName) {
+//   updateSvgComponent(val);
+// }
+// watch(
+//   durationName,
+//   (newVal) => {
+//     if (newVal) {
+//       // updateSvgComponent(newVal);
+//       console.log(newVal);
+//       // eventBus.emit("update-all-beats");
+//     }
+//   }
+//   // { immediate: true }
+// );
+
+onBeforeMount(() => {
   const val = props.beat?.duration?.name;
   if (val) {
     updateSvgComponent(val);
-    eventBus.emit("update-all-beats");
   }
 });
+// Вынесите логику обновления в отдельную функцию
+// function updateSvgComponent(val) {
+//   const points = store.checkDurations(
+//     props.orderIndex,
+//     props.beatOrderIndex,
+//     val
+//   );
+//   switch (val) {
+//     case "WHOLE":
+//       SvgComponent.value = null;
+//       svgProps.value = {};
+//       break;
+//     case "HALF":
+//       SvgComponent.value = markRaw(Half);
+//       svgProps.value = points;
+//       break;
+//     case "QUARTER":
+//       SvgComponent.value = markRaw(Quarter);
+//       svgProps.value = points;
+//       break;
+//     case "EIGHTH":
+//       SvgComponent.value = markRaw(Eigth);
+//       svgProps.value = points;
+//       break;
+//     case "SIXTEENTH":
+//       SvgComponent.value = markRaw(Sixteenth);
+//       svgProps.value = points;
+//       break;
+//     case "THIRTY_SECOND":
+//       SvgComponent.value = markRaw(ThirtySeconds);
+//       svgProps.value = points;
+//       break;
+//     case "SIXTY_FOUR":
+//       SvgComponent.value = markRaw(SixtyFour);
+//       svgProps.value = points;
+//       break;
+//   }
+// }
+// const durationName = computed(() => props.beat?.duration?.name);
+
+// watch(
+//   durationName,
+//   (newVal) => {
+//     if (newVal) {
+//       updateSvgComponent(newVal);
+//       eventBus.emit("update-all-beats");
+//     }
+//   },
+//   { immediate: true }
+// );
+
+// watch(
+//   () => props.beat?.duration?.name,
+//   (newVal) => {
+//     updateSvgComponent(newVal);
+//     eventBus.emit("update-all-beats");
+//   },
+//   { immediate: true }
+// );
+
+// eventBus.on("update-all-beats", () => {
+//   updateSvgComponent(props.beat?.duration?.name);
+// });
+
+// const val = computed(
+//   () => props.beat?.duration?.name,
+//   () => {
+//     console.log("DADADAAd");
+//     if (val) updateSvgComponent(val);
+//   }
+// );
+
+// onMounted(() => {
+//   const val = props.beat?.duration?.name;
+//   if (val) {
+//     updateSvgComponent(val);
+//     eventBus.emit("update-all-beats");
+//   }
+// });
 </script>
 
 <template lang="pug">

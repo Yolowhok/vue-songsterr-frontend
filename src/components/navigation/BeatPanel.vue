@@ -122,7 +122,12 @@ function onClick(name) {
   eventBus.emit("update-all-beats");
 }
 function deleteBeat() {
-  console.log(props.barOrderIndex, props.beatOrderIndex);
+  console.log("DELETE");
+  console.log(
+    "props.barOrderIndex, props.beatOrderIndex",
+    props.barOrderIndex,
+    props.beatOrderIndex
+  );
   store.deleteBeat(props.barOrderIndex, props.beatOrderIndex);
 
   eventBus.emit("update-all-beats");

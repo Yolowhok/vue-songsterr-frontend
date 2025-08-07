@@ -3,7 +3,7 @@ import { newStore } from "../store/notesheet-store";
 
 export function getFretboard() {
   const store = newStore();
-  const oldStore = useMyStore();
+
   const notes = store.getNoteOctavesOrdered;
 
   const tuning =

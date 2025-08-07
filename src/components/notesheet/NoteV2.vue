@@ -138,6 +138,8 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener("click", onClickOutside);
 });
+
+onMounted(() => {});
 </script>
 
 <template lang="pug">

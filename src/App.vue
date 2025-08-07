@@ -1,14 +1,25 @@
 <script setup>
 import General from "./components/General.vue";
 import { onBeforeMount } from "vue";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 import { newStore } from "./store/notesheet-store";
 
 const store = newStore();
 onBeforeMount(async () => {
-  await store.fetchCompositionList();
-  await store.fetchNoteOctaveOrdered();
-  await store.fetchDuration();
+  console.log("APP");
+
+  // await store.fetchNoteOctaveOrdered();
+
+  // await store.fetchCompositionList();
+  // await store.fetchDuration();
+  // console.log("route.params.num", route.params.num);
+
+  // if (route.params.num) {
+  //   console.log(route.params.num);
+  // }
+  // console.log("APP");
   console.log("store.getDuration", store.getDuration);
 });
 </script>
