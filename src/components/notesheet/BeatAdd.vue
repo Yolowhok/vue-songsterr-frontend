@@ -1,7 +1,10 @@
 <script setup>
 import BeatAdd from "../../assets/BeatAdd.svg"; // или '../assets/logo.svg' в зависимости от структуры
 import { useMyStore } from "../../store/notesheet-store";
+import { newStore } from "../../store/notesheet-store";
 import { defineProps, watch } from "vue";
+import eventBus from "../../eventBus";
+const store = newStore();
 
 const props = defineProps({
   beatOrderIndex: {
@@ -16,17 +19,17 @@ const props = defineProps({
   },
 });
 
-const store = useMyStore();
+// const store = useMyStore();
 const addBeat = () => {
   store.addBeat(props.barOrderIndex, props.beatOrderIndex);
   eventBus.emit("update-all-beats");
 };
-watch(
-  () => store.notesheets.notesheets[store.notesheetChoise].bars,
-  (newVal, oldVal) => {
-    // console.log("notesheets изменились", newVal);
-  }
-);
+// watch(
+//   // () => store.notesheets.notesheets[store.notesheetChoise].bars,
+//   (newVal, oldVal) => {
+//     // console.log("notesheets изменились", newVal);
+//   }
+// );
 </script>
 
 <template lang="pug">
@@ -56,9 +59,11 @@ watch(
 .beat .logo {
   opacity: 0;
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
-  transition: opacity 0.1s ease, 0.5s ease;
+  transition: opacity 0.5s ease, 0.5s ease;
   /* color: #007bff; */
-  color: rgb(111, 0, 255);
+
+  color: rgb(131, 38, 251);
+  /* rgb(111, 0, 255); */
 }
 .beat:hover .logo {
   opacity: 1;

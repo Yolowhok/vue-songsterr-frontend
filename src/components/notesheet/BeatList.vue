@@ -1,7 +1,7 @@
 <script setup>
 import Beat from "./Beat.vue";
 import BeatAdd from "./BeatAdd.vue";
-import { watch, defineProps, ref, onBeforeMount } from "vue";
+import { watch, defineProps, ref, onBeforeMount, onUpdated } from "vue";
 import { computed, toRefs, reactive } from "vue";
 import { useMyStore } from "../../store/notesheet-store";
 import { newStore } from "../../store/notesheet-store";
@@ -40,23 +40,23 @@ eventBus.on("update-all-beats", () => {
   // points.value =
   // console.log(store.checkAllDurations(props?.beats));
   // points.value =
-  store.checkAllDurations(props?.beats);
+  // store.checkAllDurations(props?.beats, props?.timeSignature);
 });
 onBeforeMount(() => {
-  console.log(props?.timeSignature);
-  store.checkAllDurations(props?.beats);
+  store.checkAllDurations(props?.beats, props?.timeSignature);
 });
+onUpdated(() => {});
 </script>
 <template lang="pug">
     div.BeatList
-        //- BeatAdd(:barOrderIndex="props.orderIndex" :beatOrderIndex="-1" :visible="false")
+        BeatAdd(:barOrderIndex="props.orderIndex" :beatOrderIndex="-1" :visible="false")
 
         //- Перебираем все beats с оберткой
         div.beat-wrapper(v-for="beat, index in props.beats" :key="beat.id" style="position: relative;")
-          Beat(:beat="beat" :id="beat.id" :orderIndex="props.orderIndex" :barId="props.barId" :beatId="beat.id" :beatOrderIndex="beat.orderIndex"  )
-          //- BeatAdd.added.overlay(v-if="beat.beatNotes.length < 1" :beatOrderIndex="-1" :visible="true")
+          Beat(:beat="beat" :id="beat.id" :orderIndex="props.orderIndex" :barId="props.barId" :beatId="beat?.id" :beatOrderIndex="beat.orderIndex"  )
+          BeatAdd.added.overlay(v-if="beat.beatNotes.length < 1" :beatOrderIndex="-1" :visible="true")
 
-        //- BeatAdd(:barOrderIndex="props.orderIndex" :beatOrderIndex="lastOrderIndex" :visible="false")
+        BeatAdd(:barOrderIndex="props.orderIndex" :beatOrderIndex="lastOrderIndex" :visible="false")
 
 </template>
 

@@ -11,6 +11,7 @@ import BarSize from "../SvgComponents/BarSize.vue";
 import BarSizePanel from "../navigation/BarSizePanel.vue";
 import BarSizeNew from "../SvgComponents/BarSizeNew.vue";
 import { newStore } from "../../store/notesheet-store";
+import eventBus from "../../eventBus";
 const height = ref(150);
 const props = defineProps({
   bar: {
@@ -41,7 +42,16 @@ const width = computed(() => {
   return (beatsCount+2) * 90 ; // вместо 100 можно использовать любое базовое значение ширины одного битa
 });
 
-
+watch(
+  bar,
+  (newVal) => {
+    if (newVal) {
+      console.log("new bar", newVal)
+      eventBus.emit("update-all-beats");
+    }
+  }
+  // { immediate: true }
+);
 const showPanel = ref(false);
 const showBarSizePanel = ref(false);
 

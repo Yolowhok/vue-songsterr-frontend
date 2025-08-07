@@ -57,6 +57,7 @@ const SvgComponent = ref(null);
 const svgProps = ref({});
 
 function updateSvgComponent(val) {
+  // console.log("upd");
   // const points = store.checkDurations(
   //   props.orderIndex,
   //   props.beatOrderIndex,
@@ -66,10 +67,13 @@ function updateSvgComponent(val) {
   //   props.orderIndex,
   //   props.beatOrderIndex
   // );
+  // console.log("VAL, beatOrderIndex", val, props.beatOrderIndex);
+  // const points = store.getPoints[props.beatOrderIndex - 1];
+  // console.log(store.getPoints, props.beatOrderIndex);
+  // console.log("points FROM BEAT", store.getPoints, props.beatOrderIndex);
+  const points = { x1: 55, x2: 90 };
 
-  const points = store.getPoints[props.beatOrderIndex - 1];
-  console.log(points);
-  //{ x1: 55, x2: 90 };
+  console.log(props);
 
   switch (val) {
     case "WHOLE":
@@ -111,20 +115,24 @@ eventBus.on("update-all-beats", () => {
 
 const durationName = computed(() => props.beat?.duration?.name);
 
-// if (durationName) {
-//   updateSvgComponent(val);
-// }
-// watch(
-//   durationName,
-//   (newVal) => {
-//     if (newVal) {
-//       // updateSvgComponent(newVal);
-//       console.log(newVal);
-//       // eventBus.emit("update-all-beats");
-//     }
+// watch(store.composition, (newVal) => {
+//   if (newVal) {
+//     updateSvgComponent(val);
 //   }
-//   // { immediate: true }
-// );
+// });
+
+watch(
+  store.composition,
+  (newVal) => {
+    if (newVal) {
+      // console.log("BEFORE");
+      // updateSvgComponent(props.beat?.duration?.name);
+      // console.log("AFTER");
+      eventBus.emit("update-all-beats");
+    }
+  }
+  // { immediate: true }
+);
 
 onBeforeMount(() => {
   const val = props.beat?.duration?.name;
@@ -183,14 +191,14 @@ onBeforeMount(() => {
 //   { immediate: true }
 // );
 
-// watch(
-//   () => props.beat?.duration?.name,
-//   (newVal) => {
-//     updateSvgComponent(newVal);
-//     eventBus.emit("update-all-beats");
-//   },
-//   { immediate: true }
-// );
+watch(
+  () => props.beat?.orderIndex,
+  (newVal) => {
+    updateSvgComponent(newVal);
+    eventBus.emit("update-all-beats");
+  },
+  { immediate: true }
+);
 
 // eventBus.on("update-all-beats", () => {
 //   updateSvgComponent(props.beat?.duration?.name);
@@ -221,7 +229,7 @@ onBeforeMount(() => {
       NoteList(:beat="props.beat"
         :orderIndex="props.orderIndex"
         :barId="props.barId"
-        :beatId="props.beatId"
+        :beatId="props?.beatId"
         :beatOrderIndex="props.beatOrderIndex")
     div
       TrashIcon.add-button.logo(@click="togglePanel" v-if="isHovered" viewBox="0 0 24 24" width="24" height="24" )
@@ -245,7 +253,8 @@ onBeforeMount(() => {
   z-index: -1; /* Чтобы не перекрывать контент */
   /* pointer-events: none; */
   /* Клики проходят сквозь него */
-  border: 1px dashed rgba(0, 0, 255, 0.3); /* Для визуализации (можно убрать) */
+  /* border: 1px dashed rgba(0, 0, 255, 0.3); */
+  /* Для визуализации (можно убрать) */
 }
 .eigth-svg {
   position: absolute;

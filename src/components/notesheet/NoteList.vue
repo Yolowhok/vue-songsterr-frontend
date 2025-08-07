@@ -38,7 +38,7 @@ function getNoteValue(numberString) {
 <template lang="pug">
     div.NoteList 
         div(v-for="i in 6" :numberString="i")
-            NoteV2(:beatNotes="props.beat.beatNotes", :orderIndex="props.orderIndex" :numberString="i" :notevaluef="getNoteValue(i)" :barId="props.barId" :beatId="props.beatId" :beatOrderIndex="props.beatOrderIndex")
+            NoteV2(:beatNotes="props.beat.beatNotes", :orderIndex="props.orderIndex" :numberString="i" :notevaluef="getNoteValue(i)" :barId="props.barId" :beatId="props?.beatId" :beatOrderIndex="props.beatOrderIndex")
 
 </template>
 <style scoped>

@@ -230,7 +230,11 @@ input[type="number"] {
   transform: scale(1.1);
 
   border-radius: 25%;
-  border: solid 2px rgb(131, 38, 251);
+  /* border: solid 2px rgb(131, 38, 251); */
+  /* outline-offset: -2px; */
+  /* Чтобы outline был внутри элемента */
+
+  outline: solid 2px rgb(131, 38, 251); /* Заменяем border на outline */
 }
 
 /* сам svg */

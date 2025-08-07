@@ -118,8 +118,14 @@ function addBarRight() {
 }
 
 function onClick(name) {
+  console.log(
+    "props.barOrderIndex, props.beatOrderIndex, name",
+    props.barOrderIndex,
+    props.beatOrderIndex,
+    name
+  );
   store.setDurationForBeat(props.barOrderIndex, props.beatOrderIndex, name);
-  eventBus.emit("update-all-beats");
+  // eventBus.emit("update-all-beats");
 }
 function deleteBeat() {
   console.log("DELETE");
@@ -130,7 +136,7 @@ function deleteBeat() {
   );
   store.deleteBeat(props.barOrderIndex, props.beatOrderIndex);
 
-  eventBus.emit("update-all-beats");
+  // eventBus.emit("update-all-beats");
 }
 </script>
 

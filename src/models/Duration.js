@@ -5,10 +5,6 @@ export class Duration {
     this.durationValue = data.durationValue;
   }
   static create() {
-    return new Duration({
-      id: 1,
-      name: "WHOLE",
-      durationValue: 1.0,
-    });
+    return new Duration({ durationValue: 0.25, id: 4, name: "QUARTER" });
   }
 }

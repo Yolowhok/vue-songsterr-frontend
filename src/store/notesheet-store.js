@@ -15,6 +15,7 @@ import { saveNotesheet } from "../api/notesheetAPI";
 import { getInstruments } from "../api/instrumentAPI";
 import { getTunings } from "../api/tuningAPI";
 import { toRaw } from "vue";
+import { Duration } from "../models/Duration";
 
 export const newStore = defineStore("newStore", {
   state: () => ({
@@ -224,6 +225,57 @@ export const newStore = defineStore("newStore", {
 
       beat.beatNotes.push(newValue);
     },
+    addBeat(barOrderIndex, beatOrderIndex) {
+      try {
+        // 1. Создаем глубокую копию notesheet
+        const currentNoteSheet =
+          this.getComposition?.notesheets[this.chosenNotesheet];
+        if (!currentNoteSheet || !Array.isArray(currentNoteSheet.bars)) {
+          console.warn("Notesheet не найден или данные некорректны");
+          return;
+        }
+        const notesheetCopy = JSON.parse(JSON.stringify(currentNoteSheet));
+
+        // 2. Находим нужный bar в копии
+        const bar = notesheetCopy.bars.find(
+          (b) => b.orderIndex === barOrderIndex
+        );
+        if (!bar) {
+          console.warn("Бар не найден с указанным orderIndex");
+          return;
+        }
+
+        // 3. Инициализируем beats, если их нет
+        if (!Array.isArray(bar.beats)) {
+          bar.beats = [];
+        }
+
+        // 4. Обрабатываем вставку (beatOrderIndex === -1 → в начало)
+        if (beatOrderIndex === -1) {
+          // Смещаем все beats с orderIndex >= 1
+          bar.beats.forEach((beat) => {
+            if (beat.orderIndex >= 1) {
+              beat.orderIndex += 1;
+            }
+          });
+          beatOrderIndex = 1; // Новый beat будет с orderIndex = 1
+        }
+
+        // 5. Создаем новый beat
+        const newBeat = Beat.create(Duration.create(), beatOrderIndex);
+
+        // 6. Добавляем beat и сортируем
+        bar.beats.push(newBeat);
+        bar.beats.sort((a, b) => a.orderIndex - b.orderIndex);
+
+        // 7. Заменяем оригинал обновленной копией
+        this.getComposition.notesheets[this.chosenNotesheet] = notesheetCopy;
+
+        console.log("Обновлённый список битов:", bar.beats);
+      } catch (error) {
+        console.error("Ошибка при добавлении бита:", error);
+      }
+    },
     checkAllDurations(beats, timeSignature) {
       if (!beats) {
         console.warn("Notesheet not found");
@@ -231,7 +283,7 @@ export const newStore = defineStore("newStore", {
       const quartDuration = 0.25;
 
       const beatsPoints = [];
-
+      console.log("beats", beats);
       beats.forEach((beat, index) => {
         beatsPoints.push({ x1: 55, x2: 90 });
         let currentBeat = beat;
@@ -271,28 +323,6 @@ export const newStore = defineStore("newStore", {
         ) {
           beatsPoints[index].x2 = 55;
         }
-
-        // if (
-        //   currentBeat?.duration?.durationValue <=
-        //     prevBeat?.duration?.durationValue &&
-        //   prevBeat?.duration?.durationValue != 0.25
-        // ) {
-        //   beatsPoints[index].x1 = -100;
-        // }
-        // if (
-        //   currentBeat?.duration?.durationValue <=
-        //     nextBeat?.duration?.durationValue &&
-        //   nextBeat?.duration?.durationValue != 0.25
-        // ) {
-        //   beatsPoints[index].x2 = 250;
-        // }
-        // if (
-        //   !nextBeat &&
-        //   prevBeat?.duration?.durationValue ==
-        //     currentBeat?.duration?.durationValue
-        // ) {
-        //   beatsPoints[index].x2 = 55;
-        // }
       });
       this.points = beatsPoints;
       return beatsPoints;
@@ -365,6 +395,58 @@ export const newStore = defineStore("newStore", {
 
       return { x1, x2 };
     },
+    // setDurationForBeat(barOrderIndex, beatOrderIndex, value) {
+    //   try {
+    //     // 1. Находим finalDuration (до работы с копией, чтобы не делать это в цикле)
+    //     const finalDuration = this.durations.data.find((d) => d.name === value);
+    //     console.log(
+    //       "barOrderIndex, beatOrderIndex, value",
+    //       barOrderIndex,
+    //       beatOrderIndex,
+    //       value
+    //     );
+    //     if (!finalDuration) {
+    //       console.warn("Duration not found");
+    //       return;
+    //     }
+
+    //     // 2. Создаем глубокую копию notesheet
+    //     const currentNoteSheet =
+    //       this.getComposition?.notesheets[this.chosenNotesheet];
+    //     if (!currentNoteSheet) {
+    //       console.warn("Notesheet not found");
+    //       return;
+    //     }
+    //     const notesheetCopy = JSON.parse(JSON.stringify(currentNoteSheet));
+
+    //     // 3. Находим bar и beat в копии
+    //     const bar = notesheetCopy.bars.find(
+    //       (bar) => bar.orderIndex === barOrderIndex
+    //     );
+    //     if (!bar) {
+    //       console.warn("Bar not found");
+    //       return;
+    //     }
+
+    //     const beat = bar.beats.find(
+    //       (beat) => beat.orderIndex === beatOrderIndex
+    //     );
+    //     if (!beat) {
+    //       console.warn("Beat not found");
+    //       return;
+    //     }
+
+    //     // 4. Обновляем duration в копии
+    //     beat.duration = finalDuration;
+
+    //     // 5. Заменяем оригинал обновленной копией
+    //     this.getComposition.notesheets[this.chosenNotesheet] = notesheetCopy;
+
+    //     console.log("Updated beat:", beat);
+    //   } catch (error) {
+    //     console.error("Error setting duration:", error);
+    //   }
+    // },
     setDurationForBeat(barOrderIndex, beatOrderIndex, value) {
       this.durations.data.forEach((duration) => {
         const finalDuration = this.durations.data.find((d) => d.name === value);
@@ -393,7 +475,12 @@ export const newStore = defineStore("newStore", {
           console.warn("Beat not found");
           return;
         }
-        beat.duration = finalDuration;
+        try {
+          beat.duration = finalDuration;
+        } catch (e) {
+          console.warn(e);
+        }
+
         // console.log(beat, finalDuration);
         // console.log(barOrderIndex, beatOrderIndex, value);
       });
@@ -402,14 +489,16 @@ export const newStore = defineStore("newStore", {
       try {
         const currentNoteSheet =
           this.getComposition?.notesheets[this.chosenNotesheet];
-
         if (!currentNoteSheet) {
           console.warn("Notesheet not found");
           return;
         }
 
-        // Найти нужный bar по barOrderIndex
-        const bar = currentNoteSheet.bars.find(
+        // 1. Создаем глубокую копию notesheet (чтобы не мутировать исходный объект)
+        const notesheetCopy = JSON.parse(JSON.stringify(currentNoteSheet));
+
+        // 2. Находим нужный bar в копии
+        const bar = notesheetCopy.bars.find(
           (bar) => bar.orderIndex === barOrderIndex
         );
         if (!bar) {
@@ -417,7 +506,7 @@ export const newStore = defineStore("newStore", {
           return;
         }
 
-        // Найти индекс beat в массиве beats
+        // 3. Находим индекс beat в копии
         const beatIndex = bar.beats.findIndex(
           (beat) => beat.orderIndex === beatOrderIndex
         );
@@ -426,17 +515,20 @@ export const newStore = defineStore("newStore", {
           return;
         }
 
-        // Удаляем beat из массива
+        // 4. Удаляем beat из копии
         bar.beats.splice(beatIndex, 1);
 
-        // Смещаем orderIndex у последующих beat
+        // 5. Обновляем orderIndex у последующих beats в копии
         for (let i = beatIndex; i < bar.beats.length; i++) {
-          bar.beats[i].orderIndex = bar.beats[i].orderIndex - 1;
+          bar.beats[i].orderIndex -= 1;
         }
+
+        // 6. Заменяем оригинальный notesheet обновленной копией
+        this.getComposition.notesheets[this.chosenNotesheet] = notesheetCopy;
+
+        console.log("Updated bar:", bar);
       } catch (error) {
-        console.log("error delete beat: ", error);
-      } finally {
-        console.log("deleteBeat done");
+        console.error("Error deleting beat:", error);
       }
     },
   },
