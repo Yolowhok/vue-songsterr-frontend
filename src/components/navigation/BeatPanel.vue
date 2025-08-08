@@ -118,23 +118,26 @@ function addBarRight() {
 }
 
 function onClick(name) {
-  console.log(
-    "props.barOrderIndex, props.beatOrderIndex, name",
-    props.barOrderIndex,
-    props.beatOrderIndex,
-    name
-  );
-  store.setDurationForBeat(props.barOrderIndex, props.beatOrderIndex, name);
+  console.log("click for upd duration for beat");
+  // console.log(
+  //   "props.barOrderIndex, props.beatOrderIndex, name",
+  //   props.barOrderIndex,
+  //   props.beatOrderIndex,
+  //   name
+  // );
+  // store.setDurationForBeat(props.barOrderIndex, props.beatOrderIndex, name);
+
+  // console.log(store.getComposition.notesheets[store.getChosenNotesheet]);
   // eventBus.emit("update-all-beats");
+  // store.setDurationForBeat(props.barOrderIndex, props.beatOrderIndex, name);
+  store.updateDurationForBeat(props.barOrderIndex, props.beatOrderIndex, name);
+  eventBus.emit("upd-beat");
 }
 function deleteBeat() {
-  console.log("DELETE");
-  console.log(
-    "props.barOrderIndex, props.beatOrderIndex",
-    props.barOrderIndex,
-    props.beatOrderIndex
-  );
+  console.log("click for delete beat");
+
   store.deleteBeat(props.barOrderIndex, props.beatOrderIndex);
+  eventBus.emit("upd-beat");
 
   // eventBus.emit("update-all-beats");
 }

@@ -125,8 +125,8 @@ export const newStore = defineStore("newStore", {
       }
     },
     setChosenComposition(composition) {
-      console.log(composition);
       this.chosenComposition = composition;
+      console.log("composition is chosed (only band and title)");
     },
     deleteNote(barOrderIndex, beatOrderIndex, noteValue) {
       const currentNoteSheet =
@@ -276,57 +276,124 @@ export const newStore = defineStore("newStore", {
         console.error("Ошибка при добавлении бита:", error);
       }
     },
-    checkAllDurations(beats, timeSignature) {
-      if (!beats) {
+    checkAllDurations() {
+      const currentNoteSheet =
+        this.getComposition?.notesheets[this.chosenNotesheet];
+      if (!currentNoteSheet) {
         console.warn("Notesheet not found");
+        return; // Прерываем выполнение, если notesheet не найден
       }
-      const quartDuration = 0.25;
 
       const beatsPoints = [];
-      console.log("beats", beats);
-      beats.forEach((beat, index) => {
-        beatsPoints.push({ x1: 55, x2: 90 });
-        let currentBeat = beat;
-        let nextBeat = beats[index + 1];
-        let prevBeat = beats[index - 1];
+      let globalBeatIndex = 0;
 
-        if (
-          (currentBeat?.duration?.durationValue ==
-            prevBeat?.duration?.durationValue ||
-            currentBeat?.duration?.durationValue ==
-              prevBeat?.duration?.durationValue) &&
-          prevBeat?.duration?.durationValue != 0.25
-        ) {
-          beatsPoints[index].x1 = -100;
-        }
-        if (
-          (currentBeat?.duration?.durationValue ==
-            nextBeat?.duration?.durationValue ||
-            currentBeat?.duration?.durationValue ==
-              nextBeat?.duration?.durationValue) &&
-          nextBeat?.duration?.durationValue != 0.25
-        ) {
-          beatsPoints[index].x2 = 250;
-        }
-        if (
-          !nextBeat &&
-          prevBeat?.duration?.durationValue ==
-            currentBeat?.duration?.durationValue
-        ) {
-          beatsPoints[index].x2 = 55;
-        }
-        if (
-          nextBeat?.duration?.durationValue !=
-            currentBeat?.duration?.durationValue &&
-          currentBeat?.duration?.durationValue ==
-            prevBeat?.duration?.durationValue
-        ) {
-          beatsPoints[index].x2 = 55;
-        }
+      currentNoteSheet?.bars.forEach((bar, barIndex) => {
+        const beats = bar?.beats || [];
+
+        beats.forEach((beat, beatIndex) => {
+          beatsPoints.push({
+            x1: 55,
+            x2: 90,
+            beatOrderIndex: beat.orderIndex,
+            barOrderIndex: bar.orderIndex,
+          });
+
+          const currentBeat = beat;
+          const nextBeat = beats[beatIndex + 1];
+          const prevBeat = beats[beatIndex - 1];
+          const currentPoint = beatsPoints[globalBeatIndex];
+
+          if (prevBeat && nextBeat) {
+            if (
+              currentBeat?.duration?.durationValue ===
+              prevBeat?.duration?.durationValue
+            ) {
+              currentPoint.x1 = -100;
+              currentPoint.x2 = 55;
+            }
+            if (
+              currentBeat?.duration?.durationValue ===
+              nextBeat?.duration?.durationValue
+            ) {
+              currentPoint.x2 = 250;
+            }
+          } else if (!prevBeat) {
+            currentPoint.x2 =
+              currentBeat?.duration?.durationValue ===
+              nextBeat?.duration?.durationValue
+                ? 250
+                : 90;
+          } else if (!nextBeat) {
+            currentPoint.x1 =
+              currentBeat?.duration?.durationValue ===
+              prevBeat?.duration?.durationValue
+                ? -100
+                : 90;
+            currentPoint.x2 =
+              currentBeat?.duration?.durationValue ===
+              prevBeat?.duration?.durationValue
+                ? 55
+                : 90;
+          }
+
+          globalBeatIndex++; // Увеличиваем глобальный счетчик
+        });
       });
+
+      console.log("Final beatsPoints:", beatsPoints);
+      console.log("updated all duration points");
       this.points = beatsPoints;
-      return beatsPoints;
     },
+    // checkAllDurations(beats, timeSignature) {
+    //   if (!beats) {
+    //     console.warn("Notesheet not found");
+    //   }
+    //   const quartDuration = 0.25;
+
+    //   const beatsPoints = [];
+    //   beats.forEach((beat, index) => {
+    //     beatsPoints.push({ x1: 55, x2: 90 });
+    //     let currentBeat = beat;
+    //     let nextBeat = beats[index + 1];
+    //     let prevBeat = beats[index - 1];
+
+    //     if (
+    //       (currentBeat?.duration?.durationValue ==
+    //         prevBeat?.duration?.durationValue ||
+    //         currentBeat?.duration?.durationValue ==
+    //           prevBeat?.duration?.durationValue) &&
+    //       prevBeat?.duration?.durationValue != 0.25
+    //     ) {
+    //       beatsPoints[index].x1 = -100;
+    //     }
+    //     if (
+    //       (currentBeat?.duration?.durationValue ==
+    //         nextBeat?.duration?.durationValue ||
+    //         currentBeat?.duration?.durationValue ==
+    //           nextBeat?.duration?.durationValue) &&
+    //       nextBeat?.duration?.durationValue != 0.25
+    //     ) {
+    //       beatsPoints[index].x2 = 250;
+    //     }
+    //     if (
+    //       !nextBeat &&
+    //       prevBeat?.duration?.durationValue ==
+    //         currentBeat?.duration?.durationValue
+    //     ) {
+    //       beatsPoints[index].x2 = 55;
+    //     }
+    //     if (
+    //       nextBeat?.duration?.durationValue !=
+    //         currentBeat?.duration?.durationValue &&
+    //       currentBeat?.duration?.durationValue ==
+    //         prevBeat?.duration?.durationValue
+    //     ) {
+    //       beatsPoints[index].x2 = 55;
+    //     }
+    //   });
+    //   this.points = beatsPoints;
+    //   return beatsPoints;
+    // },
     checkDurations(barOrderIndex, beatOrderIndex, name) {
       const currentNoteSheet =
         this.getComposition?.notesheets[this.chosenNotesheet];
@@ -480,10 +547,43 @@ export const newStore = defineStore("newStore", {
         } catch (e) {
           console.warn(e);
         }
-
+        console.log("обновленный список битов", bar.beats);
         // console.log(beat, finalDuration);
         // console.log(barOrderIndex, beatOrderIndex, value);
       });
+    },
+    updateDurationForBeat(barOrderIndex, beatOrderIndex, value) {
+      let finalDuration = "";
+      this.durations.data.forEach((duration) => {
+        finalDuration = this.durations.data.find((d) => d.name === value);
+      });
+      const currentNoteSheet =
+        this.getComposition?.notesheets[this.chosenNotesheet];
+
+      if (!currentNoteSheet) {
+        console.warn("Notesheet not found");
+        return;
+      }
+
+      // Найти нужный bar по barId
+      const bar = currentNoteSheet.bars.find(
+        (bar) => bar.orderIndex === barOrderIndex
+      );
+      if (!bar) {
+        console.warn("Bar not found");
+        return;
+      }
+
+      // Найти нужный beat внутри bar
+      const beat = bar.beats.find((beat) => beat.orderIndex === beatOrderIndex);
+      try {
+        beat.duration = finalDuration;
+      } catch (e) {
+        console.warn(e);
+      }
+      // console.log("final", bar);
+
+      console.log("Update duration for one beat is done");
     },
     deleteBeat(barOrderIndex, beatOrderIndex) {
       try {

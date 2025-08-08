@@ -7,7 +7,6 @@ const props = defineProps({
     type: Object,
   },
 });
-console.log("POINTS", props.points);
 </script>
 
 <template lang="pug">

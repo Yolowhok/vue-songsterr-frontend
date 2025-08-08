@@ -43,7 +43,8 @@ eventBus.on("update-all-beats", () => {
   // store.checkAllDurations(props?.beats, props?.timeSignature);
 });
 onBeforeMount(() => {
-  store.checkAllDurations(props?.beats, props?.timeSignature);
+  // store.checkAllDurations(props?.beats, props?.timeSignature);
+  store.checkAllDurations();
 });
 onUpdated(() => {});
 </script>

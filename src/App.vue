@@ -20,7 +20,6 @@ onBeforeMount(async () => {
   //   console.log(route.params.num);
   // }
   // console.log("APP");
-  console.log("store.getDuration", store.getDuration);
 });
 </script>
 

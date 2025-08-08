@@ -33,8 +33,6 @@ onMounted(async () => {
     store.setChosenComposition(store.getCompositionById(route.params.id));
     store.fetchComposition(route.params.id);
 
-    console.log(store.getFretboard);
-
     // Перенесем таймаут ПЕРЕД finally
     setTimeout(() => {
       isLoading.value = false;

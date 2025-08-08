@@ -46,8 +46,8 @@ watch(
   bar,
   (newVal) => {
     if (newVal) {
-      console.log("new bar", newVal)
-      eventBus.emit("update-all-beats");
+      // console.log("new bar", newVal)
+      // eventBus.emit("update-all-beats");
     }
   }
   // { immediate: true }
@@ -88,6 +88,7 @@ const showBarSize = computed(() => {
   // return currTS.upper != prevTS.upper || currTS.lower != prevTS.lower
 })
 onMounted(() => {
+
 })
 </script>
 

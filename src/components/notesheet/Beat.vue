@@ -48,14 +48,13 @@ function onMouseLeave() {
 }
 function close() {
   if (showPanel.value != false) {
-    console.log(true);
     showPanel.value = false; // скрываем панель при уходе курсора
   }
 }
 
 const SvgComponent = ref(null);
 const svgProps = ref({});
-
+const points = ref();
 function updateSvgComponent(val) {
   // console.log("upd");
   // const points = store.checkDurations(
@@ -71,10 +70,13 @@ function updateSvgComponent(val) {
   // const points = store.getPoints[props.beatOrderIndex - 1];
   // console.log(store.getPoints, props.beatOrderIndex);
   // console.log("points FROM BEAT", store.getPoints, props.beatOrderIndex);
-  const points = { x1: 55, x2: 90 };
-
-  console.log(props);
-
+  // const points = { x1: 55, x2: 90 };
+  const points = store.getPoints.find(
+    (point) =>
+      point.beatOrderIndex == props.beatOrderIndex &&
+      point.barOrderIndex == props.orderIndex
+  );
+  console.log(points);
   switch (val) {
     case "WHOLE":
       SvgComponent.value = null;
@@ -107,118 +109,87 @@ function updateSvgComponent(val) {
   }
 }
 
-eventBus.on("update-all-beats", () => {
-  // console.log(props);
-
-  updateSvgComponent(props.beat?.duration?.name);
-});
-
-const durationName = computed(() => props.beat?.duration?.name);
-
-// watch(store.composition, (newVal) => {
-//   if (newVal) {
-//     updateSvgComponent(val);
-//   }
-// });
-
-watch(
-  store.composition,
-  (newVal) => {
-    if (newVal) {
-      // console.log("BEFORE");
-      // updateSvgComponent(props.beat?.duration?.name);
-      // console.log("AFTER");
-      eventBus.emit("update-all-beats");
-    }
-  }
-  // { immediate: true }
-);
-
-onBeforeMount(() => {
-  const val = props.beat?.duration?.name;
-  if (val) {
-    updateSvgComponent(val);
-  }
-});
-// Вынесите логику обновления в отдельную функцию
-// function updateSvgComponent(val) {
-//   const points = store.checkDurations(
-//     props.orderIndex,
-//     props.beatOrderIndex,
-//     val
-//   );
-//   switch (val) {
-//     case "WHOLE":
-//       SvgComponent.value = null;
-//       svgProps.value = {};
-//       break;
-//     case "HALF":
-//       SvgComponent.value = markRaw(Half);
-//       svgProps.value = points;
-//       break;
-//     case "QUARTER":
-//       SvgComponent.value = markRaw(Quarter);
-//       svgProps.value = points;
-//       break;
-//     case "EIGHTH":
-//       SvgComponent.value = markRaw(Eigth);
-//       svgProps.value = points;
-//       break;
-//     case "SIXTEENTH":
-//       SvgComponent.value = markRaw(Sixteenth);
-//       svgProps.value = points;
-//       break;
-//     case "THIRTY_SECOND":
-//       SvgComponent.value = markRaw(ThirtySeconds);
-//       svgProps.value = points;
-//       break;
-//     case "SIXTY_FOUR":
-//       SvgComponent.value = markRaw(SixtyFour);
-//       svgProps.value = points;
-//       break;
-//   }
-// }
-// const durationName = computed(() => props.beat?.duration?.name);
-
-// watch(
-//   durationName,
-//   (newVal) => {
-//     if (newVal) {
-//       updateSvgComponent(newVal);
-//       eventBus.emit("update-all-beats");
-//     }
-//   },
-//   { immediate: true }
-// );
-
-watch(
-  () => props.beat?.orderIndex,
-  (newVal) => {
-    updateSvgComponent(newVal);
-    eventBus.emit("update-all-beats");
-  },
-  { immediate: true }
-);
-
 // eventBus.on("update-all-beats", () => {
 //   updateSvgComponent(props.beat?.duration?.name);
 // });
+eventBus.on("upd-beat", () => {
+  store.checkAllDurations();
 
-// const val = computed(
+  // console.log("upd-beat event bus");
+  updateSvgComponent(props.beat?.duration?.name);
+});
+// const duration = props.beat?.duration?.name;
+// const durationName = computed(() => props.beat?.duration?.name);
+
+// const durationName = ref("");
+// watch(
 //   () => props.beat?.duration?.name,
-//   () => {
-//     console.log("DADADAAd");
-//     if (val) updateSvgComponent(val);
-//   }
+//   (newName) => {
+//     if (newName) durationName.value = newName;
+//   },
+//   { immediate: true } // 🔥 Запустится сразу при создании
 // );
-
-// onMounted(() => {
-//   const val = props.beat?.duration?.name;
-//   if (val) {
-//     updateSvgComponent(val);
+// watch(store.composition, (newVal) => {
+//   if (newVal) {
 //     eventBus.emit("update-all-beats");
 //   }
 // });
+
+// onBeforeMount(() => {
+//   const val = props.beat?.duration?.name;
+//   if (val) {
+//     updateSvgComponent(val);
+//   }
+// });
+
+// onMounted(() => {
+//   // updateSvgComponent(props.beat?.duration?.name);
+//   updateSvgComponent(duration);
+// });
+
+watch(
+  () => props.beat?.duration,
+  (newVal) => {
+    // updateSvgComponent(props.beat?.duration.name);
+    // store.checkAllDurations();
+    // updateSvgComponent(props.beat?.duration.name);
+    // console.log(store.getPoints);
+    // eventBus.emit("update-all-beats");
+    // svgProps.value = store.getPoints[props.beatOrderIndex - 1];
+    // store.checkAllDurations();
+    // console.log(newVal);
+    // updateSvgComponent(newVal);
+  }
+  // { immediate: true }
+);
+// Отслеживание изменений точек
+
+onMounted(() => {
+  updateSvgComponent(props.beat?.duration.name);
+});
+
+// watch(
+//   () => store.getPoints,
+//   () => {
+//     points = store.getPoints.find(
+//       (point) =>
+//         point.beatOrderIndex == props.beatOrderIndex &&
+//         point.barOrderIndex == props.orderIndex
+//     );
+//     console.log(points);
+//   },
+//   { deep: true }.
+//   { immediate: true }
+
+// );
+// watch(
+//   () => props.beat?.orderIndex,
+//   (newVal) => {
+//     updateSvgComponent(newVal);
+//     eventBus.emit("update-all-beats");
+//   },
+//   { immediate: true }
+// );
 </script>
 
 <template lang="pug">
@@ -235,8 +206,9 @@ watch(
       TrashIcon.add-button.logo(@click="togglePanel" v-if="isHovered" viewBox="0 0 24 24" width="24" height="24" )
       div.popup-panel(v-if="showPanel"  @click="close")
           BeatPanel(:barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
-
     component.eigth-svg(v-if="SvgComponent" :is="SvgComponent" :points="svgProps")
+
+
 
 
 
