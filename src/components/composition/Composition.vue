@@ -4,6 +4,7 @@ import { newStore } from "../../store/notesheet-store";
 import { useRoute } from "vue-router";
 import CompositionHeader from "./CompositionHeader.vue";
 import CompositionBody from "./CompositionBody.vue";
+
 const route = useRoute();
 const store = newStore();
 
@@ -33,7 +34,7 @@ onMounted(async () => {
     store.setChosenComposition(store.getCompositionById(route.params.id));
 
     store.fetchComposition(route.params.id);
-
+    store.setCacheComposition(store.getComposition);
     // Перенесем таймаут ПЕРЕД finally
     setTimeout(() => {
       isLoading.value = false;

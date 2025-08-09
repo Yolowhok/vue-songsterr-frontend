@@ -5,6 +5,9 @@ import Modal from "./navigation/Modal.vue";
 import { computed, onBeforeMount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { newStore } from "../store/notesheet-store";
+defineOptions({
+  name: "General", // Важно! Именно 'General' с большой буквы
+});
 const route = useRoute();
 const router = useRouter();
 
@@ -24,12 +27,6 @@ div.values
   <!-- Основной контент -->
   div.main 
     router-view
-
-    //- div.content
-    //-     - var n = 0
-    //-     while n < 150
-    //-     h1 Основной контент
-    //-     - n++
   
   <!-- Модальное окно -->
   Modal(:isVisible="isModalVisible" @update:isVisible="handleModalClose")

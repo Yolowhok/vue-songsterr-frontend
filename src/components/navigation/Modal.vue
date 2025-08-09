@@ -23,8 +23,7 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeydown));
 transition(name="modal")
   div(v-if="isVisible" class="modal-overlay" @click="closeModal")
     div.modal-content(@click.stop)
-      //- h2 Это модальное окно
-      //- p Простой контент без роутеров и параметров
+
       slot
 </template>
 

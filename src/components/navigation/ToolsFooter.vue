@@ -9,10 +9,12 @@ import {
 } from "vue";
 import Modal from "./Modal.vue";
 import { newStore } from "../../store/notesheet-store";
+import NotesheetsListPanel from "./NotesheetsListPanel.vue";
 
 const store = newStore();
 const emit = defineEmits(["open-modal"]);
 
+const isVisible = ref(false);
 const openModal = () => {
   emit("open-modal");
 };
@@ -37,6 +39,10 @@ function deleteNotesheet() {
 function changeOrientation() {
   store.toggleOrientation();
 }
+function openNotesheetList() {
+  console.log("store.getNotesheetList", store.getNotesheetList);
+  isVisible.value = !isVisible.value;
+}
 </script>
 <template lang="pug">
 
@@ -47,10 +53,11 @@ function changeOrientation() {
           ul.navigation
             li
               div.flex
-                button.action-btn
-                  router-link.link.default(@click="openModal" :to="{name: 'createComposition'}") 
+                button.action-btn(@click="openNotesheetList") 
+                  div.link.default
                     i.material-symbols-outlined stacks
                     span.link-text ОТКРЫТЬ ПАНЕЛЬ
+              NotesheetsListPanel(v-if="isVisible")
             li
               div.flex
                 button.action-btn

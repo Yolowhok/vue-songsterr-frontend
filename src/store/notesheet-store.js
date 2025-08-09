@@ -32,6 +32,8 @@ export const newStore = defineStore("newStore", {
     settings: {
       orientation: "nowrap",
     },
+    cachedComposition: null,
+    lastCompositionId: null,
   }),
 
   getters: {
@@ -52,6 +54,15 @@ export const newStore = defineStore("newStore", {
         // Если не нашли нигде
         return null;
       };
+    },
+
+    getNotesheetList(state) {
+      return this.getComposition?.notesheets ?? [];
+    },
+    getCachedComposition: (state) => state.cachedComposition,
+    getLastCompositionId: (state) => state.lastCompositionId,
+    getCurrentNotesheet: (state) => {
+      return this.getComposition.notesheets[this.getChosenNotesheet];
     },
     getOrientation: (state) => {
       return state.settings.orientation;
@@ -113,6 +124,10 @@ export const newStore = defineStore("newStore", {
     },
     async fetchSaveNotesheet(data) {
       return await saveNotesheet(data);
+    },
+    setCacheComposition(composition) {
+      this.cachedComposition = composition;
+      this.lastCompositionId = composition.id;
     },
     setFretboard() {
       this.fretboard = null;
