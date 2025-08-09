@@ -5,7 +5,6 @@ import {
   ref,
   watchEffect,
   markRaw,
-  onBeforeMount,
   onUnmounted,
 } from "vue";
 import NoteList from "./NoteList.vue";
@@ -22,7 +21,6 @@ import SixtyFour from "../SvgComponents/SixtyFour.vue";
 import { watch } from "vue";
 import eventBus from "../../eventBus";
 import { newStore } from "../../store/notesheet-store";
-
 import DeleteBeat from "../SvgComponents/DeleteBeat.vue";
 
 const store = newStore();
@@ -41,9 +39,34 @@ const isHovered = ref(false);
 const showPanel = ref(false);
 const showDeleteIcon = ref(false);
 
-function togglePanel() {
-  showPanel.value = !showPanel.value;
-}
+// Создаем ссылки для элементов
+const panelRef = ref(null);
+const buttonRef = ref(null);
+
+// Обработчик закрытия всех панелей
+const closeAllPanels = () => {
+  showPanel.value = false;
+};
+
+// Подписываемся на событие закрытия всех панелей
+onMounted(() => {
+  eventBus.on("close-all-beat-panels", closeAllPanels);
+  document.addEventListener("click", handleClickOutside);
+  updateSvgComponent();
+});
+
+// Отписываемся при демонтировании
+onUnmounted(() => {
+  eventBus.off("close-all-beat-panels", closeAllPanels);
+  document.removeEventListener("click", handleClickOutside);
+});
+
+// Обработчик клика вне панели
+const handleClickOutside = (event) => {
+  if (panelRef.value && !panelRef.value.contains(event.target)) {
+    showPanel.value = false;
+  }
+};
 
 function onMouseEnter() {
   isHovered.value = true;
@@ -53,13 +76,14 @@ function onMouseEnter() {
 function onMouseLeave() {
   isHovered.value = false;
   showDeleteIcon.value = false;
-  // showPanel.value = false;
 }
 
-function close() {
-  if (showPanel.value != false) {
-    showPanel.value = false;
-  }
+function togglePanel(event) {
+  event.stopPropagation();
+  // Отправляем событие для закрытия всех панелей
+  eventBus.emit("close-all-beat-panels");
+  // Открываем текущую панель
+  showPanel.value = !showPanel.value;
 }
 
 const SvgComponent = ref(null);
@@ -120,31 +144,6 @@ eventBus.on("upd-beat", () => {
   store.checkAllDurations();
   updateSvgComponent();
 });
-
-onMounted(() => {
-  updateSvgComponent();
-});
-
-// const handleClickOutside = (event) => {
-//   if (
-//     // isVisible.value &&
-//     // notesheetListPanelRef.value &&
-//     // openButtonRef.value &&
-//     // !notesheetListPanelRef.value.$el.contains(event.target) &&
-//     // !openButtonRef.value.contains(event.target)
-//   ) {
-//     // isVisible.value = false;
-//   }
-// };
-const handleClickOutside = (event) => {};
-onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
-});
-
-// Убираем обработчик при демонтировании
-onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
-});
 </script>
 
 <template lang="pug">
@@ -154,12 +153,11 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
   div.beat
     NoteList(:beat="props.beat" :orderIndex="props.orderIndex" :barId="props.barId" :beatId="props?.beatId" :beatOrderIndex="props.beatOrderIndex")
   div
-    TrashIcon.add-button.logo(@click="togglePanel" v-if="isHovered" viewBox="0 0 24 24" width="24" height="24") 
-    div.popup-panel(v-if="showPanel" @click="close")
+    TrashIcon.add-button.logo(ref="buttonRef" @click="togglePanel" v-if="isHovered" viewBox="0 0 24 24" width="24" height="24") 
+    div.popup-panel(v-if="showPanel" ref="panelRef")
       BeatPanel(:barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
   component.eigth-svg(v-if="SvgComponent" :is="SvgComponent" :points="svgProps")
 </template>
-
 <style scoped>
 .transparent-overlay {
   position: absolute;
@@ -175,9 +173,6 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
 
 .delete-beat {
   position: absolute;
-  /* top: 50%; */
-  /* left: 50%; */
-  /* transform: translate(-50%, -50%); */
   cursor: pointer;
   z-index: 5;
   opacity: 0.7;

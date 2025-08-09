@@ -26,19 +26,10 @@ function addBarRight() {
 
 function onClick(name) {
   console.log("click for upd duration for beat");
-  // console.log(
-  //   "props.barOrderIndex, props.beatOrderIndex, name",
-  //   props.barOrderIndex,
-  //   props.beatOrderIndex,
-  //   name
-  // );
-  // store.setDurationForBeat(props.barOrderIndex, props.beatOrderIndex, name);
 
-  // console.log(store.getComposition.notesheets[store.getChosenNotesheet]);
-  // eventBus.emit("update-all-beats");
-  // store.setDurationForBeat(props.barOrderIndex, props.beatOrderIndex, name);
   store.updateDurationForBeat(props.barOrderIndex, props.beatOrderIndex, name);
   eventBus.emit("upd-beat");
+  eventBus.emit("close-all-beat-panels");
 }
 function deleteBeat() {
   console.log("click for delete beat");
