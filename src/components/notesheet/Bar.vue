@@ -12,6 +12,7 @@ import BarSizePanel from "../navigation/BarSizePanel.vue";
 import BarSizeNew from "../SvgComponents/BarSizeNew.vue";
 import { newStore } from "../../store/notesheet-store";
 import eventBus from "../../eventBus";
+
 const height = ref(150);
 const props = defineProps({
   bar: {
@@ -27,7 +28,7 @@ const props = defineProps({
 //- BeatList(:beats="bar.beats" :orderIndex = "props.orderIndex" :barId="props.bar?.id")
 
 const oldStore = useMyStore();
-
+const store = newStore()
 // watch(
 //   () => store.notesheets.notesheets[store.notesheetChoise].bars,
 
@@ -70,22 +71,23 @@ function onMouseLeaveBarSize() {
 }
 
 const showBarSize = computed(() => {
-  // console.log(props.bar)
-  // const bars = store.notesheets.notesheets[store.notesheetChoise].bars
-  // const currentOrderIndex = props.orderIndex
+  console.log(props.bar)
 
-  // if (currentOrderIndex == 0) return true // первый бар — показать
+  const bars = store.getComposition.notesheets[store.getChosenNotesheet].bars
+  const currentOrderIndex = props.orderIndex
 
-  // // Найти предыдущий бар с orderIndex на 1 меньше
-  // const prevBar = bars.find(b => b.orderIndex === currentOrderIndex - 1)
+  if (currentOrderIndex == 0) return true // первый бар — показать
 
-  // if (!prevBar) return true // если нет предыдущего, показать
+  // Найти предыдущий бар с orderIndex на 1 меньше
+  const prevBar = bars.find(b => b.orderIndex === currentOrderIndex - 1)
 
-  // const currTS = props.bar?.timeSignature || {}
-  // const prevTS = prevBar?.timeSignature || {}
-  // // console.log(currentOrderIndex, currTS, prevTS)
-  // console.log(props.bar)
-  // return currTS.upper != prevTS.upper || currTS.lower != prevTS.lower
+  if (!prevBar) return true // если нет предыдущего, показать
+
+  const currTS = props.bar?.timeSignature || {}
+  const prevTS = prevBar?.timeSignature || {}
+  // console.log(currentOrderIndex, currTS, prevTS)
+  console.log(props.bar)
+  return currTS.upper != prevTS.upper || currTS.lower != prevTS.lower
 })
 onMounted(() => {
 
@@ -95,11 +97,11 @@ onMounted(() => {
 <template lang="pug">
     div.bar(:style="{ width: width + 'px'}"   )
         div.annotation(@mouseleave="onMouseLeaveBarSize")
-          //- BarSizeNew(v-if="!showBarSize" @click="toggleBarSizePanel")
+          BarSizeNew(v-if="!showBarSize" @click="toggleBarSizePanel")
           
-          //- BarSize(v-if="showBarSize" :bar="props.bar" @click="toggleBarSizePanel")
-          //- div.popup-panel-bar-size(v-if="showBarSizePanel" @mouseleave="onMouseLeaveBarSize")
-          //-   BarSizePanel( :bar="props.bar")
+          BarSize(v-if="showBarSize" :bar="props.bar" @click="toggleBarSizePanel")
+          div.popup-panel-bar-size(v-if="showBarSizePanel" @mouseleave="onMouseLeaveBarSize")
+            BarSizePanel( :bar="props.bar")
 
 
         div.lines
@@ -108,10 +110,10 @@ onMounted(() => {
             Lines.lines-content
 
         div.duration(@mouseleave="onMouseLeave") 
-          //- div.button
-          //-   TrashIcon.button.logo(@click="togglePanel") .
-          //-   div.popup-panel(v-if="showPanel")
-          //-     BarPanel(:bar="bar" :index="bar.value?.orderIndex" )
+          div.button
+            TrashIcon.button.logo(@click="togglePanel") .
+            div.popup-panel(v-if="showPanel")
+              BarPanel(:bar="bar" :index="bar.value?.orderIndex" )
 
 
 </template>
@@ -176,14 +178,19 @@ onMounted(() => {
 
 .popup-panel {
   position: absolute;
-  bottom: 50px; /* чуть выше кнопки */
+  /* чуть выше кнопки */
   right: 0;
+  bottom: 0;
+  top: 60%;
+  left: 80%;
+  align-items: center;
+
   width: 150px;
-  height: 100px;
-  padding: 10px;
-  background: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 150px;
+  /* padding: 10px; */
+  /* background: white; */
+  /* border: 1px solid #ccc; */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
   z-index: 10;
   border-radius: 4px;
 }
@@ -198,7 +205,7 @@ onMounted(() => {
   padding: 10px;
   background: white;
   border: 1px solid #ccc;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
   z-index: 10;
   border-radius: 4px;
 }

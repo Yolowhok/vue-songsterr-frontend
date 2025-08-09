@@ -31,12 +31,13 @@ onMounted(async () => {
     store.setFretboard();
     store.setChosenNotesheet(route.params.num);
     store.setChosenComposition(store.getCompositionById(route.params.id));
+
     store.fetchComposition(route.params.id);
 
     // Перенесем таймаут ПЕРЕД finally
     setTimeout(() => {
       isLoading.value = false;
-    }, 1000);
+    }, 500);
   } catch (error) {
     console.error("Ошибка загрузки:", error);
     isLoading.value = false; // В случае ошибки сразу скрываем загрузку

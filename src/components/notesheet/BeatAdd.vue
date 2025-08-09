@@ -22,7 +22,7 @@ const props = defineProps({
 // const store = useMyStore();
 const addBeat = () => {
   store.addBeat(props.barOrderIndex, props.beatOrderIndex);
-  eventBus.emit("update-all-beats");
+  eventBus.emit("upd-beat");
 };
 // watch(
 //   // () => store.notesheets.notesheets[store.notesheetChoise].bars,

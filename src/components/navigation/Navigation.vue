@@ -47,7 +47,7 @@ header.header(ref="headerRef")
         li
           div.flex
             button.action-btn
-              router-link.link(@click="openModal" :to="{ name: 'list' }")
+              router-link.link.default(@click="openModal" :to="{ name: 'list' }")
                 i.material-symbols-outlined search
                 span.link-text СПИСОК
 
@@ -55,7 +55,7 @@ header.header(ref="headerRef")
         li
           div.flex
             button.action-btn
-              router-link.link(@click="openModal" :to="{name: 'createComposition'}") 
+              router-link.link.default(@click="openModal" :to="{name: 'createComposition'}") 
                 i.material-symbols-outlined add_ad
                 span.link-text ДОБАВИТЬ
 </template>
@@ -189,7 +189,9 @@ span {
   opacity: 0;
   pointer-events: none;
 }
-
+.default:hover {
+  color: rgb(131, 38, 251);
+}
 @keyframes fadeInDown {
   from {
     opacity: 0;

@@ -1,62 +1,71 @@
 <script setup>
 import { defineProps, ref, watch } from "vue";
-import { useMyStore } from "../../store/notesheet-store";
+import { newStore } from "../../store/notesheet-store";
 
 const props = defineProps({
   bar: Object,
 });
 
-const store = useMyStore();
-
+const store = newStore();
 const upper = ref(props.bar?.timeSignature.upper);
 const lower = ref(props.bar?.timeSignature.lower);
 
-function clampValue(value) {
+// Допустимые значения для lower (степени двойки)
+const validLowerValues = [1, 2, 4, 8, 16, 32, 64, 128];
+
+function clampUpper(value) {
   if (value === "" || value === null) return "";
-  let num = Number(value);
+  const num = Math.round(Number(value));
   if (isNaN(num)) return "";
-  if (num < 1) return 1;
-  if (num > 32) return 32;
-  return num;
+  return Math.min(128, Math.max(1, num));
 }
 
-// Автоматическая корректировка input
-watch(upper, (newVal, oldVal) => {
-  upper.value = clampValue(newVal);
+function clampLower(value) {
+  if (value === "" || value === null) return "";
+  const num = Math.round(Number(value));
+  if (isNaN(num)) return "";
+
+  // Находим ближайшую допустимую степень двойки
+  return validLowerValues.reduce((prev, curr) =>
+    Math.abs(curr - num) < Math.abs(prev - num) ? curr : prev
+  );
+}
+
+watch(upper, (newVal) => {
+  upper.value = clampUpper(newVal);
 });
 
-watch(lower, (newVal, oldVal) => {
-  lower.value = clampValue(newVal);
+watch(lower, (newVal) => {
+  lower.value = clampLower(newVal);
 });
 
 function confirmBarSize() {
-  console.log(upper.value, lower.value);
-  store.changeBarSize(props.bar.orderIndex, {
-    upper: upper.value,
-    lower: lower.value,
+  store.updateBarSize(props.bar.orderIndex, {
+    upper: upper.value || 4,
+    lower: lower.value || 4,
   });
-  console.log(props.bar);
 }
 </script>
 
 <template lang="pug">
-  div.panel
-    div
-      input(
-        type="number"
-        v-model.number="upper"
-        min="1"
-        max="32"
-      )
-    div
-      input(
-        type="number"
-        v-model.number="lower"
-        min="1"
-        max="32"
-
-      )
-    button(type="button" @click="confirmBarSize") ОК
+div.panel
+  div
+    input(
+      type="number"
+      v-model.number="upper"
+      min="1"
+      max="32"
+      @keypress="(e) => /[0-9]/.test(e.key) || e.preventDefault()"
+    )
+  div
+    input(
+      type="number"
+      v-model.number="lower"
+      min="1"
+      max="32"
+      @keypress="(e) => /[0-9]/.test(e.key) || e.preventDefault()"
+    )
+  button(type="button" @click="confirmBarSize") ОК
 </template>
 
 <style scoped>

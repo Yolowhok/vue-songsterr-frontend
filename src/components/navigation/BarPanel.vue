@@ -1,10 +1,9 @@
 <script setup>
 import { defineProps, computed } from "vue";
 import { useMyStore } from "../../store/notesheet-store";
-import BarRight from "../../assets/BarLeft.svg";
-import BarLeft from "../../assets/BarRight.svg";
-import Delete from "../../assets/Delete.svg";
+import { newStore } from "../../store/notesheet-store";
 
+const store = newStore();
 const storePinia = useMyStore();
 const props = defineProps({
   bar: {
@@ -16,96 +15,92 @@ const props = defineProps({
 });
 const bar = computed(() => props.bar);
 
-function addBarLeft() {}
+function addBarLeft() {
+  store.addBarLeft(bar.value?.orderIndex);
+  store.checkAllDurations();
+}
+
 function addBarRight() {
-  storePinia.fetchAddBarRigth(0, bar.value?.orderIndex);
-  console.log(storePinia.notesheets.notesheets[storePinia.notesheetChoise]);
+  store.addBarRight(bar.value?.orderIndex);
+  store.checkAllDurations();
 }
 
 function deleteBar() {
-  storePinia.fetchDeleteBar(0, bar.value?.orderIndex);
+  store.deleteBar(bar.value?.orderIndex);
+  store.checkAllDurations();
 }
 </script>
 
 <template lang="pug">
-    //- | Здесь будет ваша всплывающая панель
-    //- div.panel
-    //-     button(@click="addBarRight()") |>
-    //-     button(@click="addBarLeft()") +|
-    //-     button(@click="deleteBar()") -
-    //-     BarLeft
-    //-     BarRight
-
-    div.panel
-      div.item-container.svg-container
-        BarRight
-      div.item-container.svg-container
-        BarLeft(@click="addBarRight")
-
-      div.item-container.svg-container.trash
-        Delete.trash(@click="deleteBar")
-
+div.panel
+  div.icon-wrapper(@click="addBarLeft")
+    span.material-symbols-outlined add_column_left
+  div.icon-wrapper.trash(@click="deleteBar")
+    span.material-symbols-outlined.trash delete
+  div.icon-wrapper(@click="addBarRight")
+    span.material-symbols-outlined add_column_right
 
 </template>
 
 <style scoped>
-/* .panel {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-} */
-
 .panel {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  width: 100%;
-  height: auto;
-  justify-content: flex-start;
-  align-content: flex-start;
-  z-index: 500;
+  gap: 12px;
+  padding: 4px;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.trash:hover {
-  color: #e63f3f;
-  filter: drop-shadow(0 0 1px rgba(255, 0, 0, 0.338));
-  transition: opacity 0.3s ease, filter 0.3s ease;
-}
-.item-container {
+.icon-wrapper {
   display: flex;
-  width: 30px;
-  height: 30px;
-  box-sizing: border-box;
-  /* Убедимся, что переход применяется и по умолчанию */
-  transition: opacity 0.3s ease, filter 0.3s ease;
-}
-
-/* Для Ronde: центр по горизонтали, внизу по вертикали */
-.item-container.svg-container:not(.svg-container-half) {
-  justify-content: center;
-  align-items: flex-end;
-}
-
-/* Для Half: центр по горизонтали и по вертикали */
-.item-container.svg-container.svg-container-half {
-  justify-content: center;
   align-items: center;
-  /* justify-content: center; */
-  /* align-items: flex-end; */
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
-.svg-container-quareter {
-  justify-content: center;
-  align-items: flex-end;
-}
-.item-container.svg-container.svg-container-ThirtySecond {
-  justify-content: center;
-  align-items: center;
+.icon-wrapper:hover {
+  /* background: #e0e0e0; */
 }
 
-/* Подсветка svg при наведении на контейнер */
-.item-container.svg-container:hover {
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
-  cursor: pointer; /* по желанию */
+.icon-wrapper.trash:hover {
+  /* background: #ffebee; */
+}
+
+.material-icons-round {
+  font-family: "Material Icons Round";
+  font-size: 20px;
+  color: #555;
+  user-select: none;
+}
+
+.icon-wrapper:hover .material-icons-round {
+  color: #1976d2;
+}
+
+.trash:hover .material-icons-round {
+  color: #e53935;
+}
+
+/* Комбинированные иконки для добавления */
+.icon-wrapper span:first-child {
+  position: absolute;
+  left: 4px;
+}
+.icon-wrapper span:last-child {
+  position: absolute;
+  right: 4px;
+}
+.material-symbols-outlined:hover {
+  color: rgb(131, 38, 251);
+}
+.trash:hover {
+  color: rgb(251, 73, 38);
 }
 </style>

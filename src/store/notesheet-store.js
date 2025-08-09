@@ -28,6 +28,7 @@ export const newStore = defineStore("newStore", {
     durations: [],
     points: [],
     isLoading: false,
+    timeSignature: [],
     settings: {
       orientation: "nowrap",
     },
@@ -101,6 +102,17 @@ export const newStore = defineStore("newStore", {
       this.durations = null;
       this.durations = await getDurations();
       console.log("Duration is load");
+    },
+    async fetchTimeSignatures() {
+      try {
+        this.timeSignature = await getTimeSignatures();
+        console.log("time signature is load");
+      } catch (e) {
+        console.warn(e);
+      }
+    },
+    async fetchSaveNotesheet(data) {
+      return await saveNotesheet(data);
     },
     setFretboard() {
       this.fretboard = null;
@@ -270,7 +282,7 @@ export const newStore = defineStore("newStore", {
 
         // 7. Заменяем оригинал обновленной копией
         this.getComposition.notesheets[this.chosenNotesheet] = notesheetCopy;
-
+        this.checkAllDurations();
         console.log("Обновлённый список битов:", bar.beats);
       } catch (error) {
         console.error("Ошибка при добавлении бита:", error);
@@ -328,7 +340,7 @@ export const newStore = defineStore("newStore", {
               currentBeat?.duration?.durationValue ===
               prevBeat?.duration?.durationValue
                 ? -100
-                : 90;
+                : 55;
             currentPoint.x2 =
               currentBeat?.duration?.durationValue ===
               prevBeat?.duration?.durationValue
@@ -343,6 +355,139 @@ export const newStore = defineStore("newStore", {
       console.log("Final beatsPoints:", beatsPoints);
       console.log("updated all duration points");
       this.points = beatsPoints;
+    },
+    addBarRight(barIndex) {
+      try {
+        // Создаем глубокую копию текущего notesheet
+        const currentNoteSheet = JSON.parse(
+          JSON.stringify(this.getComposition?.notesheets[this.chosenNotesheet])
+        );
+
+        if (!currentNoteSheet || !Array.isArray(currentNoteSheet.bars)) {
+          console.warn(
+            "Невозможно добавить бар: данные отсутствуют или некорректны"
+          );
+          return;
+        }
+
+        // Создаем копию массива bars для безопасной работы
+        const updatedBars = [...currentNoteSheet.bars];
+
+        // Сортируем бары по orderIndex
+        updatedBars.sort((a, b) => a.orderIndex - b.orderIndex);
+
+        // Создаем новый бар с правильным orderIndex
+        const newBar = Bar.create(120, barIndex + 1);
+
+        // Обновляем orderIndex для всех баров справа от barIndex
+        const updatedBarsWithShift = updatedBars.map((bar) => {
+          if (bar.orderIndex > barIndex) {
+            return { ...bar, orderIndex: bar.orderIndex + 1 };
+          }
+          return bar;
+        });
+
+        // Добавляем новый бар
+        updatedBarsWithShift.push(newBar);
+
+        // Сортируем снова (хотя теоретически не нужно, так как мы контролируем индексы)
+        updatedBarsWithShift.sort((a, b) => a.orderIndex - b.orderIndex);
+
+        // Обновляем состояние
+        this.getComposition.notesheets[this.chosenNotesheet].bars =
+          updatedBarsWithShift;
+
+        console.log("Add bar right is done", newBar);
+      } catch (error) {
+        console.error("Ошибка при добавлении бара справа:", error);
+      }
+    },
+    addBarLeft(barIndex) {
+      try {
+        // Создаем глубокую копию текущего notesheet
+        const currentNoteSheet = JSON.parse(
+          JSON.stringify(this.getComposition?.notesheets[this.chosenNotesheet])
+        );
+
+        if (!currentNoteSheet || !Array.isArray(currentNoteSheet.bars)) {
+          console.warn(
+            "Невозможно добавить бар: данные отсутствуют или некорректны"
+          );
+          return;
+        }
+
+        // Создаем копию массива bars для безопасной работы
+        const updatedBars = [...currentNoteSheet.bars];
+
+        // Сортируем бары по orderIndex
+        updatedBars.sort((a, b) => a.orderIndex - b.orderIndex);
+
+        // Создаем новый бар с правильным orderIndex
+        const newBar = Bar.create(120, barIndex); // Новый бар получает orderIndex текущего бара
+
+        // Обновляем orderIndex для всех баров начиная с barIndex
+        const updatedBarsWithShift = updatedBars.map((bar) => {
+          if (bar.orderIndex >= barIndex) {
+            return { ...bar, orderIndex: bar.orderIndex + 1 };
+          }
+          return bar;
+        });
+
+        // Добавляем новый бар
+        updatedBarsWithShift.push(newBar);
+
+        // Сортируем снова
+        updatedBarsWithShift.sort((a, b) => a.orderIndex - b.orderIndex);
+
+        // Обновляем состояние
+        this.getComposition.notesheets[this.chosenNotesheet].bars =
+          updatedBarsWithShift;
+
+        console.log("Add bar left is done", newBar);
+      } catch (error) {
+        console.error("Ошибка при добавлении бара слева:", error);
+      }
+    },
+    deleteBar(orderIndexToDelete) {
+      try {
+        // Создаем глубокую копию текущего notesheet
+        const currentNoteSheet = JSON.parse(
+          JSON.stringify(this.getComposition?.notesheets[this.chosenNotesheet])
+        );
+
+        if (!currentNoteSheet || !Array.isArray(currentNoteSheet.bars)) {
+          console.warn(
+            "Невозможно удалить бар: данные отсутствуют или некорректны"
+          );
+          return;
+        }
+
+        // Фильтруем бары и обновляем индексы
+        const updatedBars = currentNoteSheet.bars
+          .filter((bar) => bar.orderIndex !== orderIndexToDelete)
+          .map((bar) => ({
+            ...bar,
+            orderIndex:
+              bar.orderIndex > orderIndexToDelete
+                ? bar.orderIndex - 1
+                : bar.orderIndex,
+          }))
+          .sort((a, b) => a.orderIndex - b.orderIndex);
+
+        // Создаем обновленный notesheet
+        const updatedNoteSheet = {
+          ...currentNoteSheet,
+          bars: updatedBars,
+        };
+
+        // Обновляем только выбранный notesheet
+        this.getComposition.notesheets[this.chosenNotesheet] = updatedNoteSheet;
+
+        console.log("Бар с orderIndex", orderIndexToDelete, "успешно удалён");
+        console.log("Обновленные бары:", updatedBars);
+      } catch (error) {
+        console.error("Ошибка при удалении бара:", error);
+      }
     },
     // checkAllDurations(beats, timeSignature) {
     //   if (!beats) {
@@ -630,6 +775,36 @@ export const newStore = defineStore("newStore", {
       } catch (error) {
         console.error("Error deleting beat:", error);
       }
+    },
+    updateBarSize(barOrderIndex, value) {
+      const currentNoteSheet =
+        this.getComposition?.notesheets[this.chosenNotesheet];
+
+      if (!currentNoteSheet) {
+        console.warn("Notesheet not found");
+        return;
+      }
+
+      // this.timeSignature.then((result) => {
+      //   console.log("timeSignature data:", result.data);
+      // });
+      const result = this.timeSignature;
+      const matchedTimeSignature = result.data.find(
+        (ts) => ts.upper == value.upper && ts.lower == value.lower
+      );
+      if (!matchedTimeSignature) {
+        console.warn("matchedTimeSignature not found");
+        return;
+      }
+      // Найти нужный bar по barOrderIndex
+      const bar = currentNoteSheet.bars.find(
+        (bar) => bar.orderIndex === barOrderIndex
+      );
+      if (!bar) {
+        console.warn("Bar not found");
+        return;
+      }
+      bar.timeSignature = matchedTimeSignature;
     },
   },
 });
@@ -1127,7 +1302,7 @@ export const useMyStore = defineStore("notesheet-store", {
       // // Можно вернуть объект с результатами или сделать с ними что-то еще
       // return { x1, x2 };
     },
-    async changeBarSize(barOrderIndex, value) {
+    changeBarSize(barOrderIndex, value) {
       const currentNoteSheet = this.notesheets.notesheets[this.notesheetChoise];
       if (!currentNoteSheet) {
         console.warn("Notesheet not found");
@@ -1137,7 +1312,7 @@ export const useMyStore = defineStore("notesheet-store", {
       // this.timeSignature.then((result) => {
       //   console.log("timeSignature data:", result.data);
       // });
-      const result = await this.timeSignature;
+      const result = this.timeSignature;
       const matchedTimeSignature = result.data.find(
         (ts) => ts.upper == value.upper && ts.lower == value.lower
       );

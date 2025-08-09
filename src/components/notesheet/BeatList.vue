@@ -35,7 +35,7 @@ const lastOrderIndex = computed(() => {
   // Получаем orderIndex последнего бита и прибавляем 1
   return props.beats[props.beats.length - 1].orderIndex + 1;
 });
-eventBus.on("update-all-beats", () => {
+eventBus.on("upd-beat", () => {
   // console.log("FROM BEATLIST update-all-beats", props?.beats);
   // points.value =
   // console.log(store.checkAllDurations(props?.beats));

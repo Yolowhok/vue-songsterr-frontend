@@ -24,9 +24,12 @@ const props = defineProps({
   },
 });
 function saveNotesheet() {
-  console.log(store.notesheets.notesheets[store.notesheetChoise]);
-  store.fetchSaveNotesheet(store.notesheets.notesheets[store.notesheetChoise]);
+  // console.log(store.notesheets.notesheets[store.notesheetChoise]);
+  // store.fetchSaveNotesheet(store.notesheets.notesheets[store.notesheetChoise]);
   console.log("save");
+  store.fetchSaveNotesheet(
+    store.getComposition?.notesheets[store.getChosenNotesheet]
+  );
 }
 function deleteNotesheet() {
   store.deleteNotesheet(store.notesheetChoise);
@@ -45,46 +48,28 @@ function changeOrientation() {
             li
               div.flex
                 button.action-btn
-                  router-link.link(@click="openModal" :to="{name: 'createComposition'}") 
+                  router-link.link.default(@click="openModal" :to="{name: 'createComposition'}") 
                     i.material-symbols-outlined stacks
                     span.link-text ОТКРЫТЬ ПАНЕЛЬ
             li
               div.flex
                 button.action-btn
-                  router-link.link(@click="openModal" :to="{ name: 'list' }")
+                  div.link.default(@click="saveNotesheet")
                     i.material-symbols-outlined save
                     span.link-text СОХРАНИТЬ
             li
               div.flex
                 button.action-btn
-                  router-link.link(@click="openModal" :to="{ name: 'list' }")
+                  div.link.delete(@click="openModal")
                     i.material-symbols-outlined scan_delete
                     span.link-text УДАЛИТЬ
             li
               div.flex
                 button.action-btn
-                  div.link(@click="changeOrientation")
+                  div.link.default(@click="changeOrientation")
                     i.material-symbols-outlined switch_access_2
                     span.link-text ИЗМЕНИТЬ РАСПОЛОЖЕНИЕ
-        //- div.flex
-        //-   button.action-btn
-        //-     router-link.link(@click="openModal" :to="{name: 'createComposition'}") 
-        //-       i.material-symbols-outlined stacks
-        //-       span.link-text ДОБАВИТЬ
-    //-     button(@click="openModal") 
-    //-       router-link.link(@click="openModal" :to="{ name: 'list' }") Открыть панель
-    //-     button(@click="openModal") 
-    //-       router-link.link(@click="openModal" :to="`/composition/${store?.notesheets?.id}/notesheetList`") Список
 
-        //- router-link.router-link(@click="openModal" :to="`/composition/${store?.notesheets?.id}/notesheetList`") Список
-
-        //- Modal(:isVisible="isModalVisible" @update:isVisible="isModalVisible = $event")
-        //- h1 {{store.notesheets.length}}
-        //- h1 {{store.notesheets ? store.notesheets.length : 0}}
-        //- button(@click="saveNotesheet") Save
-        //- button(@click="deleteNotesheet") Delete
-        //- h1 test 2
-        //- h1 test 3
 </template>
 
 <style scoped>
@@ -164,7 +149,9 @@ span {
 .link {
   cursor: pointer;
   font-weight: 500;
-  color: #313131;
+  /* color: #313131; */
+  color: #6f6f6f;
+
   font-size: clamp(14px, calc(0.5vw + 0.5vh), 50px);
   display: flex;
   flex-direction: column;
@@ -173,7 +160,7 @@ span {
   height: 50px;
 }
 .link:hover {
-  color: #2b2b2b;
+  /* color: #2b2b2b; */
 
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
@@ -224,6 +211,14 @@ span {
   transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
+}
+.default:hover {
+  /* color: #36f439;  */
+  color: rgb(131, 38, 251);
+  /* Красный цвет при наведении */
+}
+.delete:hover {
+  color: #f44336; /* Красный цвет при наведении */
 }
 
 @keyframes fadeInDown {

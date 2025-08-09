@@ -1,22 +1,34 @@
 <script setup>
-import { onMounted, onBeforeMount } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { newStore } from "../../store/notesheet-store";
 
 const store = newStore();
+const composition = ref(null);
 
-onMounted(() => {});
-onBeforeMount(async () => {});
+// Правильное отслеживание изменений выбранной композиции
+watch(
+  () => store.getChosenComposition,
+  (newVal) => {
+    composition.value = newVal;
+  },
+  { immediate: true }
+);
+
+// Загрузка данных при монтировании
+onMounted(() => {
+  composition.value = store.getChosenComposition;
+});
 </script>
-<template lang="pug">
 
+<template lang="pug">
 div.header
-    div.title
-        h1 {{store.getChosenComposition?.title}}
-    div.band
-        h2 {{store.getChosenComposition?.band}} 
-    div.date(v-if="store.getChosenComposition?.updatedAt")
-        h3 Обновлён:
-        h3 {{store.getChosenComposition?.updatedAt}}  
+  div.title
+    h1 {{composition?.title }}
+  div.band
+    h2 {{composition?.band }}
+  div.date(v-if="composition?.updatedAt")
+    h3 Обновлён:
+    h3 {{new Date(composition.updatedAt).toLocaleDateString()}}  
 </template>
 
 <style scoped>

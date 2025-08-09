@@ -234,7 +234,8 @@ input[type="number"] {
   /* outline-offset: -2px; */
   /* Чтобы outline был внутри элемента */
 
-  outline: solid 2px rgb(131, 38, 251); /* Заменяем border на outline */
+  outline: solid 2px rgb(131, 38, 251);
+  /* Заменяем border на outline */
 }
 
 /* сам svg */

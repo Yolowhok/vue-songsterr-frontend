@@ -8,18 +8,8 @@ import { newStore } from "./store/notesheet-store";
 
 const store = newStore();
 onBeforeMount(async () => {
-  console.log("APP");
-
-  // await store.fetchNoteOctaveOrdered();
-
-  // await store.fetchCompositionList();
-  // await store.fetchDuration();
-  // console.log("route.params.num", route.params.num);
-
-  // if (route.params.num) {
-  //   console.log(route.params.num);
-  // }
-  // console.log("APP");
+  await store.fetchCompositionList();
+  await store.fetchTimeSignatures();
 });
 </script>
 
