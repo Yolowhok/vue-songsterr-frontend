@@ -6,11 +6,11 @@ import {
   defineProps,
   onBeforeMount,
   inject,
+  onUnmounted,
 } from "vue";
 import Modal from "./Modal.vue";
 import { newStore } from "../../store/notesheet-store";
 import NotesheetsListPanel from "./NotesheetsListPanel.vue";
-
 const store = newStore();
 const emit = defineEmits(["open-modal"]);
 
@@ -19,7 +19,7 @@ const openModal = () => {
   emit("open-modal");
 };
 const isModalVisible = ref(false);
-
+const panelRef = ref(null);
 const props = defineProps({
   store: {
     type: Object,
@@ -43,6 +43,29 @@ function openNotesheetList() {
   console.log("store.getNotesheetList", store.getNotesheetList);
   isVisible.value = !isVisible.value;
 }
+const openButtonRef = ref(null); // Ссылка на кнопку открытия
+const notesheetListPanelRef = ref(null); // Ссылка на панель
+const handleClickOutside = (event) => {
+  if (
+    isVisible.value &&
+    notesheetListPanelRef.value &&
+    openButtonRef.value &&
+    !notesheetListPanelRef.value.$el.contains(event.target) &&
+    !openButtonRef.value.contains(event.target)
+  ) {
+    isVisible.value = false;
+  }
+};
+
+// Вешаем обработчик при монтировании
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
+
+// Убираем обработчик при демонтировании
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
 </script>
 <template lang="pug">
 
@@ -53,11 +76,11 @@ function openNotesheetList() {
           ul.navigation
             li
               div.flex
-                button.action-btn(@click="openNotesheetList") 
+                button.action-btn(ref="openButtonRef" @click="openNotesheetList") 
                   div.link.default
                     i.material-symbols-outlined stacks
                     span.link-text ОТКРЫТЬ ПАНЕЛЬ
-              NotesheetsListPanel(v-if="isVisible")
+              NotesheetsListPanel(v-if="isVisible" ref="notesheetListPanelRef")
             li
               div.flex
                 button.action-btn

@@ -6,6 +6,7 @@ import {
   watchEffect,
   markRaw,
   onBeforeMount,
+  onUnmounted,
 } from "vue";
 import NoteList from "./NoteList.vue";
 import { useMyStore } from "../../store/notesheet-store";
@@ -21,6 +22,7 @@ import SixtyFour from "../SvgComponents/SixtyFour.vue";
 import { watch } from "vue";
 import eventBus from "../../eventBus";
 import { newStore } from "../../store/notesheet-store";
+
 import DeleteBeat from "../SvgComponents/DeleteBeat.vue";
 
 const store = newStore();
@@ -51,7 +53,7 @@ function onMouseEnter() {
 function onMouseLeave() {
   isHovered.value = false;
   showDeleteIcon.value = false;
-  showPanel.value = false;
+  // showPanel.value = false;
 }
 
 function close() {
@@ -121,6 +123,27 @@ eventBus.on("upd-beat", () => {
 
 onMounted(() => {
   updateSvgComponent();
+});
+
+// const handleClickOutside = (event) => {
+//   if (
+//     // isVisible.value &&
+//     // notesheetListPanelRef.value &&
+//     // openButtonRef.value &&
+//     // !notesheetListPanelRef.value.$el.contains(event.target) &&
+//     // !openButtonRef.value.contains(event.target)
+//   ) {
+//     // isVisible.value = false;
+//   }
+// };
+const handleClickOutside = (event) => {};
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
+
+// Убираем обработчик при демонтировании
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
