@@ -4,9 +4,11 @@ import { newStore } from "../../store/notesheet-store";
 import { useRoute } from "vue-router";
 import CompositionHeader from "./CompositionHeader.vue";
 import CompositionBody from "./CompositionBody.vue";
-
+import { nextTick } from "vue";
+import { useRouter } from "vue-router";
 const route = useRoute();
 const store = newStore();
+const router = useRouter();
 
 const isLoading = ref(true);
 // onMounted(async () => {
@@ -24,7 +26,6 @@ onMounted(async () => {
   console.log("store.getCachedComposition", store.getCachedComposition);
 
   if (store.getCachedComposition?.id == route.params.id) {
-    console.log("YESYEYESYEYESYEYESYEYESYEYESYEYESYEYESYE");
     store.setFretboard();
     store.setChosenNotesheet(route.params.num);
     store.setChosenComposition(store.getCompositionById(route.params.id));
@@ -35,26 +36,24 @@ onMounted(async () => {
     // setTimeout(() => {}, 100);
   } else {
     try {
-      console.log("route.params.id in composition ", route.params.id);
-      await store.fetchComposition(route.params.id);
+      await store.fetchComposition(route.params.id); // Основной запрос
       await store.fetchNoteOctaveOrdered();
-
-      // await store.fetchCompositionList();
-      // await store.fetchDuration();
 
       store.setFretboard();
       store.setChosenNotesheet(route.params.num);
       store.setChosenComposition(store.getCompositionById(route.params.id));
 
-      store.fetchComposition(route.params.id);
       store.setCacheComposition(store.getComposition);
-      // Перенесем таймаут ПЕРЕД finally
+      console.log(store.getComposition);
+
       setTimeout(() => {
         isLoading.value = false;
       }, 500);
     } catch (error) {
       console.error("Ошибка загрузки:", error);
-      isLoading.value = false; // В случае ошибки сразу скрываем загрузку
+      isLoading.value = false; // Скрываем индикатор загрузки
+      await router.push("/");
+      // Перенаправляем на главную
     }
   }
 });
@@ -62,8 +61,11 @@ onMounted(async () => {
 <template lang="pug">
 div.container
 
-
-  CompositionHeader.compositionHeader
+  template(v-if="isLoading")
+    .skeleton-body
+      .skeleton-row(v-for="i in 1" :key="i")
+  template(v-else)
+    CompositionHeader.compositionHeader
   template(v-if="isLoading")
     .skeleton-body.compositionBody
       .skeleton-row(v-for="i in 10" :key="i")

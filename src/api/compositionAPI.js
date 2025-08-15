@@ -23,6 +23,9 @@ export function saveComposition(data) {
 export function createComposition(data) {
   return api.post("/composition/create", data);
 }
+export function deleteComposition(id) {
+  return api.post(`/composition/delete/${id}`);
+}
 
 // import axios from "axios";
 // import api from "./api";

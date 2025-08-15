@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import { getCompositions, saveComposition } from "../api/compositionAPI";
 import { getCompositionByIdFull } from "../api/compositionAPI";
 import { getCompositionNotesheetsListById } from "../api/compositionAPI";
+import { deleteComposition } from "../api/compositionAPI";
 import { createComposition } from "../api/compositionAPI";
 import { Bar } from "../models/Bar";
 import { getFretboard } from "../scripts/freatboard";
@@ -18,6 +19,7 @@ import { getTunings } from "../api/tuningAPI";
 import { toRaw } from "vue";
 import { Duration } from "../models/Duration";
 import { Composition } from "../models/Composition";
+import { useRouter } from "vue-router";
 
 export const newStore = defineStore("newStore", {
   state: () => ({
@@ -91,7 +93,7 @@ export const newStore = defineStore("newStore", {
     async fetchCompositionList() {
       try {
         const response = await getCompositions();
-        this.compositionList = response.data; // устанавливаем в state
+        this.compositionList = await response.data; // устанавливаем в state
         console.log("Composition list is load");
       } catch (e) {
         console.error("Ошибка при загрузке композиций", e);
@@ -104,6 +106,7 @@ export const newStore = defineStore("newStore", {
         console.log("Composition is load");
       } catch (e) {
         console.error("Ошибка при загрузке notesheets", e);
+        throw e;
       }
     },
     async fetchNoteOctaveOrdered() {
@@ -131,12 +134,10 @@ export const newStore = defineStore("newStore", {
     },
     async fetchCreateComposition(data) {
       try {
-        const newComposition = Composition.createDefault(
-          data,
-          this.getDefaultTuning
-        );
-        await createComposition(newComposition);
+        const newComposition = Composition.create(data.band, data.title);
+        const composition = await createComposition(newComposition);
         console.log("Composition is created");
+        return composition;
       } catch (e) {
         console.warn(e);
       }
@@ -147,6 +148,20 @@ export const newStore = defineStore("newStore", {
         console.log("Tuning list is load");
       } catch (e) {
         console.warn(e);
+      }
+    },
+    async fetchDeleteComposition(id) {
+      try {
+        await deleteComposition(id);
+        // this.compositionList = this.compositionList.filter((c) => c.id !== id);
+        this.cachedComposition = null;
+        console.log("Composition is delete");
+      } catch (e) {
+        if (error.response?.status === 404) {
+          console.error("Объект не найден");
+        } else {
+          console.error("Ошибка сервера", error);
+        }
       }
     },
     setCacheComposition(composition) {

@@ -8,6 +8,11 @@ import {
   inject,
   onUnmounted,
 } from "vue";
+import { nextTick } from "vue";
+import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
+const route = useRoute();
+const router = useRouter();
 import Modal from "./Modal.vue";
 import { newStore } from "../../store/notesheet-store";
 import NotesheetsListPanel from "./NotesheetsListPanel.vue";
@@ -33,8 +38,14 @@ function saveNotesheet() {
     store.getComposition?.notesheets[store.getChosenNotesheet]
   );
 }
-function deleteNotesheet() {
-  store.deleteNotesheet(store.notesheetChoise);
+async function deleteComposition() {
+  await store.fetchDeleteComposition(route.params.id);
+  store.setChosenComposition(null);
+  console.log("After delete", store.compositionList);
+  await store.fetchCompositionList();
+  await router.push("/?refresh=1");
+  await nextTick();
+  console.log("After fetch", store.compositionLis, store.getCachedComposition);
 }
 function changeOrientation() {
   store.toggleOrientation();
@@ -90,7 +101,7 @@ onUnmounted(() => {
             li
               div.flex
                 button.action-btn
-                  div.link.delete(@click="deleteNotesheet" )
+                  div.link.delete(@click="deleteComposition" )
                     i.material-symbols-outlined scan_delete
                     span.link-text УДАЛИТЬ
             li

@@ -8,9 +8,15 @@ const store = newStore();
 const band = ref("");
 const title = ref("");
 
-function createNewNotesheet() {
-  console.log(band.value, title.value);
-  store.fetchCreateComposition({ band: band.value, title: title.value });
+async function createNewNotesheet() {
+  const composition = await store.fetchCreateComposition({
+    band: band.value,
+    title: title.value,
+  });
+  console.log(composition.data);
+  store.fetchCompositionList();
+
+  router.push(`/composition/${composition.data.id}/notesheet/0`);
 }
 </script>
 

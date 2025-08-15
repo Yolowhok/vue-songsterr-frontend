@@ -6,7 +6,8 @@ import { newStore } from "../../store/notesheet-store";
 import { onMounted, onBeforeMount, ref, computed } from "vue";
 
 const store = newStore();
-const compositionsList = computed(() => store.getCompositionList);
+// const compositionsList = computed(() => store.getCompositionList);
+const compositionsList = computed(() => store.compositionList);
 </script>
 
 <template lang="pug">
@@ -21,7 +22,7 @@ const compositionsList = computed(() => store.getCompositionList);
                                 @blur="isFocused = false")
               span.search-icon
                 i.material-icons search
-      div.list(v-if="!store.isCompositionListEmpty")
+      div.list(v-if="!store.isCompositionListEmpty" )
         div.test 
           div(v-for="(composition, index) in compositionsList")
             CompositionItem(

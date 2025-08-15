@@ -5,23 +5,27 @@ import Modal from "./navigation/Modal.vue";
 import { computed, onBeforeMount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { newStore } from "../store/notesheet-store";
+import { ref } from "vue";
+
 defineOptions({
   name: "General", // Важно! Именно 'General' с большой буквы
 });
 const route = useRoute();
 const router = useRouter();
-
+const store = newStore();
 // Видимость модалки определяется мета-данными роута
 const isModalVisible = computed(() => route.meta.requiresModal || false);
+const visitedRoutes = ref([]);
+
+// Функция для возврата
 
 // Закрытие модалки через навигацию назад
 const handleModalClose = () => {
-  // router.go(-1);
-  // window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/')
-  window.history.length > 1 &&
-  window.history.state.back != "/create/composition"
-    ? router.go(-1)
-    : router.push("/composition/2/notesheet/0");
+  if (window.history.length > 1 && store.getChosenComposition.id) {
+    router.push(
+      `/composition/` + store.getChosenComposition.id + `/notesheet/` + 0
+    );
+  }
 };
 </script>
 
