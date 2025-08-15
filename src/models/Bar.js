@@ -19,4 +19,13 @@ export class Bar {
       beats: [Beat.create(1, 1)],
     });
   }
+  static createDefault() {
+    return new Bar({
+      id: null,
+      tempInBpm: 120,
+      timeSignature: TimeSignature.Create(),
+      orderIndex: 1,
+      beats: [Beat.createDefault()],
+    });
+  }
 }

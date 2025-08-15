@@ -39,8 +39,8 @@ onMounted(async () => {
       await store.fetchComposition(route.params.id);
       await store.fetchNoteOctaveOrdered();
 
-      await store.fetchCompositionList();
-      await store.fetchDuration();
+      // await store.fetchCompositionList();
+      // await store.fetchDuration();
 
       store.setFretboard();
       store.setChosenNotesheet(route.params.num);

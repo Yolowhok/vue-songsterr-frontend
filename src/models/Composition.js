@@ -22,6 +22,16 @@ export class Composition {
       notesheets: [],
     });
   }
+  static createDefault(data, tuning) {
+    return new Composition({
+      id: null,
+      band: data.band,
+      title: data.title,
+      createdAt: null,
+      updatedAt: null,
+      notesheets: [Notesheet.createDefault(tuning)],
+    });
+  }
 }
 
 export const getCompositionsById = async (compositions, id) => {

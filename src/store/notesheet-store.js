@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import { getCompositions, saveComposition } from "../api/compositionAPI";
 import { getCompositionByIdFull } from "../api/compositionAPI";
 import { getCompositionNotesheetsListById } from "../api/compositionAPI";
+import { createComposition } from "../api/compositionAPI";
 import { Bar } from "../models/Bar";
 import { getFretboard } from "../scripts/freatboard";
 import { getNoteOctavesOrdered } from "../api/notesAPI";
@@ -16,6 +17,7 @@ import { getInstruments } from "../api/instrumentAPI";
 import { getTunings } from "../api/tuningAPI";
 import { toRaw } from "vue";
 import { Duration } from "../models/Duration";
+import { Composition } from "../models/Composition";
 
 export const newStore = defineStore("newStore", {
   state: () => ({
@@ -32,6 +34,7 @@ export const newStore = defineStore("newStore", {
     settings: {
       orientation: "nowrap",
     },
+    tunings: [],
     cachedComposition: null,
     lastCompositionId: null,
   }),
@@ -71,6 +74,7 @@ export const newStore = defineStore("newStore", {
     getFretboard: (state) => state.fretboard,
     getDuration: (state) => state.durations,
     getPoints: (state) => state.points,
+    getDefaultTuning: (state) => state.tunings[0] || [],
     isCompositionListEmpty: (state) => {
       return (
         Array.isArray(state.compositionList) &&
@@ -124,6 +128,26 @@ export const newStore = defineStore("newStore", {
     },
     async fetchSaveNotesheet(data) {
       return await saveNotesheet(data);
+    },
+    async fetchCreateComposition(data) {
+      try {
+        const newComposition = Composition.createDefault(
+          data,
+          this.getDefaultTuning
+        );
+        await createComposition(newComposition);
+        console.log("Composition is created");
+      } catch (e) {
+        console.warn(e);
+      }
+    },
+    async fetchTuningList() {
+      try {
+        this.tunings = (await getTunings()).data;
+        console.log("Tuning list is load");
+      } catch (e) {
+        console.warn(e);
+      }
     },
     setCacheComposition(composition) {
       this.cachedComposition = composition;
@@ -504,8 +528,6 @@ export const newStore = defineStore("newStore", {
         console.error("Ошибка при удалении бара:", error);
       }
     },
-
-    // checkAllDurations(beats, timeSignature) {
     //   if (!beats) {
     //     console.warn("Notesheet not found");
     //   }
@@ -623,7 +645,6 @@ export const newStore = defineStore("newStore", {
 
       return { x1, x2 };
     },
-    // setDurationForBeat(barOrderIndex, beatOrderIndex, value) {
     //   try {
     //     // 1. Находим finalDuration (до работы с копией, чтобы не делать это в цикле)
     //     const finalDuration = this.durations.data.find((d) => d.name === value);

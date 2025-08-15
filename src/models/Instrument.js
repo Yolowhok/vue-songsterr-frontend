@@ -9,4 +9,10 @@ export class Instrument {
       name: "GUITAR",
     });
   }
+  static createDefault() {
+    return new Instrument({
+      id: 1,
+      name: "GUITAR",
+    });
+  }
 }

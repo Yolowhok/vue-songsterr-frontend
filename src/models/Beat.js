@@ -17,4 +17,12 @@ export class Beat {
       beatNotes: [],
     });
   }
+  static createDefault() {
+    return new Beat({
+      id: null,
+      duration: Duration.create(),
+      orderIndex: 1,
+      beatNotes: [],
+    });
+  }
 }

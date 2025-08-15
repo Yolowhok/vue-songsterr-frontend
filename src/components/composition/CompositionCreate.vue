@@ -1,15 +1,16 @@
 <script setup>
 import { ref } from "vue";
-import { useMyStore } from "../../store/notesheet-store";
+import { newStore } from "../../store/notesheet-store";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const store = useMyStore();
+const store = newStore();
 const band = ref("");
 const title = ref("");
 
 function createNewNotesheet() {
   console.log(band.value, title.value);
+  store.fetchCreateComposition({ band: band.value, title: title.value });
 }
 </script>
 
@@ -22,14 +23,22 @@ div.flex
           type="text" 
           v-model="band" 
           required 
-          placeholder="НАЗВАНИЕ ГРУППЫ"
+          placeholder="Название группы"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
         )
       div.input-group
         input#title(
           type="text" 
           v-model="title" 
           required 
-          placeholder="НАЗВАНИЕ КОМПОЗИЦИИ"
+          placeholder="Название композиции"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
         )
       
       div.panel-controls

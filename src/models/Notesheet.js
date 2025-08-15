@@ -26,6 +26,14 @@ export class Notesheet {
       bars: [],
     });
   }
+  static createDefault(tuning) {
+    return new Notesheet({
+      id: null,
+      instrument: Instrument.createDefault(),
+      tuning: tuning,
+      bars: [Bar.createDefault()],
+    });
+  }
 }
 export const getNotesheetById = async (notesheet, id) => {
   try {
