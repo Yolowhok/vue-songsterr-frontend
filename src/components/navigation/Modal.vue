@@ -44,7 +44,16 @@ transition(name="modal")
 }
 
 .modal-content {
-  background: white;
+  /* background: white; */
+  /* padding: 2rem; */
+  /* border-radius: 8px; */
+  width: 50vw;
+  /* background-color: #ffffff; */
+  position: relative;
+  /* color: black; */
+  max-height: 75vh;
+  overflow-y: auto;
+  /* background: white;
   padding: 2rem;
   border-radius: 8px;
   width: 50vw;
@@ -53,11 +62,11 @@ transition(name="modal")
 
   position: relative;
 
-  /* color: black; */
+
 
   max-height: 75vh;
-  /* Ограничиваем максимальную высоту */
-  overflow-y: auto; /* Добавляем скролл, если содержимого больше, чем max-height */
+
+  overflow-y: auto;  */
 }
 
 .close {

@@ -90,7 +90,7 @@ onUnmounted(() => {
             li
               div.flex
                 button.action-btn
-                  div.link.delete(@click="openModal")
+                  div.link.delete(@click="deleteNotesheet" )
                     i.material-symbols-outlined scan_delete
                     span.link-text УДАЛИТЬ
             li

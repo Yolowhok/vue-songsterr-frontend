@@ -504,6 +504,7 @@ export const newStore = defineStore("newStore", {
         console.error("Ошибка при удалении бара:", error);
       }
     },
+
     // checkAllDurations(beats, timeSignature) {
     //   if (!beats) {
     //     console.warn("Notesheet not found");

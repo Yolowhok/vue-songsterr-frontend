@@ -2,6 +2,7 @@
 import { defineProps, computed } from "vue";
 import { useMyStore } from "../../store/notesheet-store";
 import { newStore } from "../../store/notesheet-store";
+import eventBus from "../../eventBus";
 
 const store = newStore();
 const storePinia = useMyStore();
@@ -18,16 +19,27 @@ const bar = computed(() => props.bar);
 function addBarLeft() {
   store.addBarLeft(bar.value?.orderIndex);
   store.checkAllDurations();
+  eventBus.emit("close-bar-panels");
 }
 
 function addBarRight() {
   store.addBarRight(bar.value?.orderIndex);
   store.checkAllDurations();
+
+  eventBus.emit("close-bar-panels");
 }
 
 function deleteBar() {
   store.deleteBar(bar.value?.orderIndex);
   store.checkAllDurations();
+  eventBus.emit("close-bar-panels");
+
+  if (
+    store.getComposition.notesheets[store.getChosenNotesheet].bars.length == 0
+  ) {
+    store.addBarRight(1);
+    store.checkAllDurations();
+  }
 }
 </script>
 

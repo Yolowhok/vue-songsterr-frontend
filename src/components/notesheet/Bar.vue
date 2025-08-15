@@ -1,5 +1,5 @@
 <script setup lang="js">
-import { ref, onMounted, reactive, defineProps, computed, watch, watchEffect } from "vue";
+import { ref, onMounted, reactive, defineProps, computed, watch, watchEffect, onUnmounted } from "vue";
 import Lines from "./Lines.vue";
 import Beat from "./Beat.vue";
 import BeatList from "./BeatList.vue";
@@ -57,19 +57,26 @@ const showPanel = ref(false);
 const showBarSizePanel = ref(false);
 
 function togglePanel() {
+
+  eventBus.emit("close-all-beat-panels");
+
   showPanel.value = !showPanel.value;
 }
 function onMouseLeave() {
-  showPanel.value = false; // скрываем панель при уходе курсора
+  // showPanel.value = false;
+  // скрываем панель при уходе курсора
 }
 function toggleBarSizePanel() {
   showBarSizePanel.value = !showBarSizePanel.value;
 
 }
 function onMouseLeaveBarSize() {
-  showBarSizePanel.value = false;
+  // showBarSizePanel.value = false;
 }
-
+function closePanel() {
+  console.log("CLOSECLOSECLOSE")
+  showPanel.value = false
+}
 const showBarSize = computed(() => {
   console.log(props.bar)
 
@@ -89,19 +96,45 @@ const showBarSize = computed(() => {
   console.log(props.bar)
   return currTS.upper != prevTS.upper || currTS.lower != prevTS.lower
 })
+function closeBarSizePanel() {
+  showBarSizePanel.value = false
+}
 onMounted(() => {
+  window.addEventListener("click", handleClickOutside)
+  eventBus.on("close-bar-panels", closePanel);
+  eventBus.on("close-bar-size-panel", closeBarSizePanel)
 
 })
+onUnmounted(() => {
+  window.removeEventListener("click", handleClickOutside)
+  eventBus.off("close-bar-panels", closePanel);
+  eventBus.off("close-bar-size-panel", closeBarSizePanel);
+
+
+})
+
+const popupPanelRef = ref(null);
+const pupupBarSizePanelRef = ref(null)
+const handleClickOutside = (event) => {
+  if (popupPanelRef.value && !popupPanelRef.value.contains(event.target)) {
+    showPanel.value = false;
+  }
+  if (pupupBarSizePanelRef.value && !pupupBarSizePanelRef.value.contains(event.target)) {
+  showBarSizePanel.value = false
+
+  }
+};
 </script>
 
 <template lang="pug">
-    div.bar(:style="{ width: width + 'px'}"   )
-        div.annotation(@mouseleave="onMouseLeaveBarSize")
-          BarSizeNew(v-if="!showBarSize" @click="toggleBarSizePanel")
-          
-          BarSize(v-if="showBarSize" :bar="props.bar" @click="toggleBarSizePanel")
-          div.popup-panel-bar-size(v-if="showBarSizePanel" @mouseleave="onMouseLeaveBarSize")
-            BarSizePanel( :bar="props.bar")
+    div.bar(:style="{ width: width + 'px'}"  )
+        div.annotation(@mouseleave="onMouseLeaveBarSize" )
+          div(ref="pupupBarSizePanelRef")
+            BarSizeNew(v-if="!showBarSize" @click="toggleBarSizePanel"  )
+            
+            BarSize(v-if="showBarSize" :bar="props.bar" @click="toggleBarSizePanel" )
+            div.popup-panel-bar-size(v-if="showBarSizePanel" @mouseleave="onMouseLeaveBarSize" )
+              BarSizePanel( :bar="props.bar")
 
 
         div.lines
@@ -109,8 +142,8 @@ onMounted(() => {
                 BeatList(:beats="bar.beats" :orderIndex = "props.orderIndex" :barId="props.bar?.id" :timeSignature="props?.bar?.timeSignature")
             Lines.lines-content
 
-        div.duration(@mouseleave="onMouseLeave") 
-          div.button
+        div.duration(@mouseleave="onMouseLeave" ) 
+          div.three-dots(  ref="popupPanelRef")
             TrashIcon.button.logo(@click="togglePanel") .
             div.popup-panel(v-if="showPanel")
               BarPanel(:bar="bar" :index="bar.value?.orderIndex" )
@@ -154,8 +187,14 @@ onMounted(() => {
 }
 .bar:hover .button {
   opacity: 1;
-  pointer-events: auto; /* включаем клики */
+  pointer-events: auto;
   cursor: pointer;
+}
+.three-dots {
+  display: flex;
+  flex-direction: row-reverse;
+  /* pointer-events: none; */
+  /* кнопка не кликабельна, пока скрыта */
 }
 
 .lines {
@@ -186,7 +225,7 @@ onMounted(() => {
   align-items: center;
 
   width: 150px;
-  height: 150px;
+  height: 10%;
   /* padding: 10px; */
   /* background: white; */
   /* border: 1px solid #ccc; */

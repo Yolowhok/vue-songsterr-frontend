@@ -16,7 +16,12 @@ const isModalVisible = computed(() => route.meta.requiresModal || false);
 
 // Закрытие модалки через навигацию назад
 const handleModalClose = () => {
-  router.go(-1);
+  // router.go(-1);
+  // window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/')
+  window.history.length > 1 &&
+  window.history.state.back != "/create/composition"
+    ? router.go(-1)
+    : router.push("/composition/2/notesheet/0");
 };
 </script>
 

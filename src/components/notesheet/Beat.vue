@@ -45,7 +45,10 @@ const buttonRef = ref(null);
 
 // Обработчик закрытия всех панелей
 const closeAllPanels = () => {
+  console.log("closeAllPanelscloseAllPanelscloseAllPanelscloseAllPanels");
   showPanel.value = false;
+  showDeleteIcon.value = false;
+  isHovered.value = false;
 };
 
 // Подписываемся на событие закрытия всех панелей
@@ -82,6 +85,9 @@ function togglePanel(event) {
   event.stopPropagation();
   // Отправляем событие для закрытия всех панелей
   eventBus.emit("close-all-beat-panels");
+  eventBus.emit("close-bar-panels");
+  eventBus.emit("close-bar-size-panel");
+
   // Открываем текущую панель
   showPanel.value = !showPanel.value;
 }
@@ -239,10 +245,9 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
   width: 100px;
   height: 200px;
   padding: 10px;
-  background: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 500;
-  border-radius: 4px;
 }
 </style>

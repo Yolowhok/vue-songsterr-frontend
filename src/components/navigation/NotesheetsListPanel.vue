@@ -1,18 +1,25 @@
 <script setup>
 import { newStore } from "../../store/notesheet-store";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const store = newStore();
 const notesheets = store.getNotesheetList;
-console.log(notesheets);
+
+function chooseNotesheet(i) {
+  router.push("/composition/" + store?.getComposition?.id + "/notesheet/" + i);
+  console.log("Route push is done");
+}
 </script>
 
 <template lang="pug">
 div.notesheet-panel(style="position: fixed; z-index: 1000;")
   div.notesheet-list
     div.notesheet-item(
-      v-for="notesheet in notesheets"
+      v-for="(notesheet, i) in notesheets"
       :key="notesheet.id"
-      @click="store.setChosenNotesheet(notesheet.id)"
+      @click="chooseNotesheet(i)"
       :class="{ active: store.chosenNotesheet === notesheet.id }"
     )
       span.notesheet-name {{ notesheet?.instrument.name || `#${notesheet.id}` }}

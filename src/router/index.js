@@ -5,7 +5,7 @@ import App from "../App.vue";
 import General from "../components/General.vue";
 import { newStore } from "../store/notesheet-store";
 import Composition from "../components/composition/Composition.vue";
-
+import CompositionCreate from "../components/composition/CompositionCreate.vue";
 const routes = [
   {
     path: "/",
@@ -31,7 +31,7 @@ const routes = [
         path: "create/composition",
         name: "createComposition",
         components: {
-          modal: () => import("../components/test.vue"),
+          modal: CompositionCreate,
         },
         meta: { requiresModal: true },
       },

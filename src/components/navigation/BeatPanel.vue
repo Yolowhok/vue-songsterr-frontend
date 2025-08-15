@@ -33,6 +33,7 @@ function onClick(name) {
 }
 function deleteBeat() {
   console.log("click for delete beat");
+  eventBus.emit("close-all-beat-panels");
 
   store.deleteBeat(props.barOrderIndex, props.beatOrderIndex);
   eventBus.emit("upd-beat");
