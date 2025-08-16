@@ -8,6 +8,7 @@ const store = newStore();
 onBeforeMount(async () => {
   await store.fetchCompositionList();
   await store.fetchDuration();
+  store.fetchTimeSignatures();
   store.fetchTuningList();
 });
 </script>

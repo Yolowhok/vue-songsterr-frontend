@@ -841,6 +841,7 @@ export const newStore = defineStore("newStore", {
       //   console.log("timeSignature data:", result.data);
       // });
       const result = this.timeSignature;
+      console.log(result);
       const matchedTimeSignature = result.data.find(
         (ts) => ts.upper == value.upper && ts.lower == value.lower
       );
