@@ -1,6 +1,6 @@
 export class TimeSignature {
   constructor(data) {
-    this.id = data.id; // Используем this для создания свойства экземпляра
+    this.id = data.id;
     this.upper = data.upper;
     this.lower = data.lower;
   }

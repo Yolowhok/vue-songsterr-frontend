@@ -9,7 +9,6 @@ function startEdit() {
   editing.value = true;
   inputValue.value = number.value !== null ? String(number.value) : "";
 }
-
 function save() {
   const val = parseInt(String(inputValue.value).trim());
   if (!isNaN(val)) {
@@ -17,7 +16,6 @@ function save() {
   }
   editing.value = false;
 }
-
 function cancel() {
   editing.value = false;
 }

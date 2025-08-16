@@ -59,7 +59,6 @@ div.flex
   justify-content: center;
   padding: 20px;
 }
-
 .creation-panel {
   width: 100%;
   max-width: 400px;
@@ -70,12 +69,10 @@ div.flex
   position: relative;
   z-index: 10;
 }
-
 .input-group {
   margin-bottom: 28px;
   position: relative;
 }
-
 .input-group::after {
   content: "";
   position: absolute;
@@ -86,11 +83,9 @@ div.flex
   background: #e2e8f0;
   transition: background-color 0.3s ease;
 }
-
 .input-group:focus-within::after {
   background: #6366f1;
 }
-
 input[type="text"] {
   border: none;
   outline: none;
@@ -101,22 +96,18 @@ input[type="text"] {
   color: #334155;
   transition: color 0.3s ease;
 }
-
 input[type="text"]:focus {
   color: #1e293b;
 }
-
 input[type="text"]::placeholder {
   color: #94a3b8;
   font-weight: 400;
 }
-
 .panel-controls {
   display: flex;
   justify-content: center;
   margin-top: 10px;
 }
-
 .control-button {
   display: flex;
   align-items: center;
@@ -136,18 +127,15 @@ input[type="text"]::placeholder {
   width: 100%;
   max-width: 220px;
 }
-
 .control-button:hover {
   background: #6366f1;
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
-
 .control-button:active {
   transform: translateY(0);
 }
-
 .material-symbols-outlined {
   font-size: 20px;
   font-weight: 600;

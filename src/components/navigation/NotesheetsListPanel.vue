@@ -52,14 +52,12 @@ div.notesheet-panel(style="position: fixed; z-index: 1000;")
   max-height: 80vh;
   overflow-y: auto;
 }
-
 .notesheet-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 12px;
 }
-
 .notesheet-item {
   padding: 12px 16px;
   background: #faf8fc;
@@ -70,35 +68,29 @@ div.notesheet-panel(style="position: fixed; z-index: 1000;")
   justify-content: space-between;
   border-left: 3px solid #ebe2f0;
 }
-
 .notesheet-item:hover {
   background: #f6f1f9;
   transform: translateX(2px);
 }
-
 .notesheet-item.active {
   background: #f2e0ff;
   border-left-color: #6366f1;
 }
-
 .notesheet-name {
   font-weight: 500;
   color: #1e293b;
 }
-
 .notesheet-meta {
   font-size: 0.75rem;
   color: #64748b;
   opacity: 0.8;
 }
-
 .panel-controls {
   display: flex;
   gap: 8px;
   padding-top: 12px;
   border-top: 1px solid #f1f5f9;
 }
-
 .control-button {
   flex: 1;
   padding: 8px 12px;
@@ -113,29 +105,24 @@ div.notesheet-panel(style="position: fixed; z-index: 1000;")
   color: #000000;
   transition: all 0.2s ease;
 }
-
 .control-button:hover {
   background: rgb(131, 38, 251);
   color: white;
 }
-
 .control-button.trash {
   background: #f8f8f8;
 
   color: #000000;
 }
-
 .control-button.trash:hover {
   color: #ffffff;
   background: #f44336;
 }
-
 .control-button.trash:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   background: #f3f4f6;
 }
-
 .material-symbols-outlined {
   font-size: 18px;
 }

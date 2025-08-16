@@ -11,11 +11,9 @@ svg.beat.logo(width="50" height="40" xmlns="http://www.w3.org/2000/svg")
 .beat {
   transition: all 0.3s ease;
 }
-
 .beat:hover {
   cursor: pointer;
 }
-
 .beat:hover .circle {
   fill: rgb(111, 0, 255);
 }

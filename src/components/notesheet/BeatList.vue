@@ -23,11 +23,6 @@ const props = defineProps({
 });
 
 const store = newStore();
-
-// const store = useMyStore();
-
-// watch(() => store.notesheets);
-// const points = ref([{}]);
 const points = reactive([]);
 
 const lastOrderIndex = computed(() => {
@@ -35,15 +30,7 @@ const lastOrderIndex = computed(() => {
   // Получаем orderIndex последнего бита и прибавляем 1
   return props.beats[props.beats.length - 1].orderIndex + 1;
 });
-eventBus.on("upd-beat", () => {
-  // console.log("FROM BEATLIST update-all-beats", props?.beats);
-  // points.value =
-  // console.log(store.checkAllDurations(props?.beats));
-  // points.value =
-  // store.checkAllDurations(props?.beats, props?.timeSignature);
-});
 onBeforeMount(() => {
-  // store.checkAllDurations(props?.beats, props?.timeSignature);
   store.checkAllDurations();
 });
 onUpdated(() => {});
@@ -51,8 +38,6 @@ onUpdated(() => {});
 <template lang="pug">
     div.BeatList
         BeatAdd(:barOrderIndex="props.orderIndex" :beatOrderIndex="-1" :visible="false")
-
-        //- Перебираем все beats с оберткой
         div.beat-wrapper(v-for="beat, index in props.beats" :key="beat.id" style="position: relative;")
           Beat(:beat="beat" :id="beat.id" :orderIndex="props.orderIndex" :barId="props.barId" :beatId="beat?.id" :beatOrderIndex="beat.orderIndex"  )
           BeatAdd.added.overlay(v-if="beat.beatNotes.length < 1" :beatOrderIndex="-1" :visible="true")
@@ -65,31 +50,22 @@ onUpdated(() => {});
 .BeatList {
   height: 100%;
   width: 100%;
-  display: flex; /* Если нужно выровнять элементы внутри */
-  align-items: center; /* Центрируем элементы внутри по вертикали */
-  justify-content: left; /* Центрируем элементы внутри по горизонтали */
+  display: flex;
+  align-items: center;
+  justify-content: left;
   flex-direction: row;
-  /* padding-left: 18%; */
-  /* padding-right: 18%; */
-  /* gap: 15%; */
 }
-
 .beat-wrapper {
   position: relative;
-  /* display: inline-block; */
-  /* или flex, чтобы подстроиться под содержимое */
   padding: 0;
   margin: 0;
   opacity: 1 !important;
 }
-
 .beat-wrapper .overlay {
   position: absolute;
   top: 0;
   left: 0;
-
   height: 100%;
-  /* z-index: 10; */
-  pointer-events: none; /* чтобы не блокировать клики */
+  pointer-events: none;
 }
 </style>

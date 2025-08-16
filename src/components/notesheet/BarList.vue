@@ -13,30 +13,6 @@ const bars = computed(
     padding-left: 100px;`;
 
 const orientation = computed(() => store.settings.orientation);
-// const bars = computed(() => store)
-
-// const oldStore = useMyStore();
-// const bars = computed(() => {
-//   if (!oldStore.notesheets.notesheets || oldStore.notesheetChoise < 0)
-//     return null;
-//   return oldStore.notesheets.notesheets[oldStore.notesheetChoise]?.bars || null;
-// });
-
-// watch(
-//   () => oldStore.notesheets,
-//   () => {},
-//   { deep: true }
-// );
-// const isBarsEmpty = computed(() => !bars.value || bars.value.length === 0);
-// watch(
-//   isBarsEmpty,
-//   (empty) => {
-//     if (empty) {
-//       oldStore.fetchAddBarRigthInEmpty(); // вызов функции из store при пустом bars
-//     }
-//   },
-//   { immediate: true }
-// );
 </script>
 
 <template lang="pug">
@@ -46,15 +22,6 @@ const orientation = computed(() => store.settings.orientation);
             template(v-if="bars && bars.length")
               div.forBar(v-for="(bar, index) in bars")
                 Bar(:bar="bar" :id="bar.id" :orderIndex="bar.orderIndex")
-              
-
-
-      //- section(v-if="bars && bars.length")
-      //-     .flex-container
-      //-       template(v-if="bars && bars.length")
-      //-         div.forBar(v-for="(bar, index) in bars")
-      //-           Bar(:bar="bar" :id="bar.id" :orderIndex="bar.orderIndex")
-
 
 
 
@@ -64,14 +31,11 @@ const orientation = computed(() => store.settings.orientation);
 <style>
 .flex-container {
   align-items: center;
-  /* width: 80%; */
   position: absolute;
   padding-left: 100px;
   padding-right: 100px;
-
-  display: flex; /* Используем flexbox для расположения элементов в строку */
+  display: flex;
   justify-content: center;
-  /* Центрируем элементы внутри по горизонтали */
 }
 
 .forBar {

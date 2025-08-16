@@ -18,29 +18,12 @@ const composition = ref(props.composition);
 const index = ref(props.index);
 
 async function loadComposition(id) {
-  // router.push(`/composition/` + id + `/notesheet/` + store.getChosenNotesheet);
   router.push(`/composition/` + id + `/notesheet/` + 0);
-
-  // if (props.composition && props.composition.id) {r
-  //   store.fetchCompositionNotesheet(props.composition.id);
-  //   store.fetchCompositionNotesheetsList(props.composition.id);
-  //   store.fetchSetNotesheetChoise(0);
-  //   await store.fetchCompositions();
-  //   await store.fetchCompositionNotesheet(id);
-  //   await store.fetchCompositionNotesheetsList(id);
-  //   await store.fetchGetFretboard();
-  //   await store.setDuration();
-  //   await store.setTimeSignatures();
-  //   await store.setInstruments();
-  //   await store.setTunings();
-  // }
 }
 </script>
 
 <template lang="pug">
-
       div(v-if="composition && composition?.id")
-
           div(:id="composition?.id" @click="loadComposition(composition?.id)").composition-item.composition
             div.v0
               div.v1
@@ -48,8 +31,6 @@ async function loadComposition(id) {
               div.v2
                 div.band-name {{composition?.band}}
                 div.song-title {{composition?.title}}
-
-      
 </template>
 
 <style scoped>
@@ -62,11 +43,9 @@ async function loadComposition(id) {
 }
 .composition {
   cursor: pointer;
-  /* display: flex; */
-  /* flex-direction: column; */
-  gap: 1rem; /* Отступ между элементами */
+  gap: 1rem;
   padding: 1.5rem;
-  background-color: #f9f9f9; /* Легкий фон */
+  background-color: #f9f9f9;
 }
 .v0 {
   width: 100%;
@@ -81,45 +60,28 @@ async function loadComposition(id) {
   width: 20%;
   text-align: center;
 }
-
-/* Стили для элемента списка */
 .composition-item {
   padding: 1rem;
   background-color: #fff;
-
-  transition: transform 0.2s; /* Плавный переход при наведении */
+  transition: transform 0.2s;
   align-items: center;
-
   color: var(--text);
   cursor: pointer;
-
   padding: 8px 30px 8px 0;
   z-index: 100;
 }
-
-/* Эффект при наведении на элемент списка */
 .composition-item:hover {
   background-color: #f4f4f4;
   cursor: pointer;
 }
-
-/* Стили для названия группы */
 .band-name {
-  /* font-size: 1.5rem;  */
   font-size: clamp(14px, calc(1vw + 1vh), 100px);
-
-  /* Крупный шрифт */
   font-weight: 550;
-
-  color: #2c3e50; /* Цвет текста */
+  color: #2c3e50;
   margin: 0;
 }
-
-/* Стили для названия песни */
 .song-title {
   font-size: clamp(14px, calc(1vw + 1vh), 100px);
-  /* font-size: 1.2rem; */
-  /* Размер шрифта */
   font-weight: 200;
   color: #34495e;
 }

@@ -21,8 +21,6 @@ const storePinia = useMyStore();
 const store = newStore();
 
 function deleteBeat() {
-  console.log("click for delete beat");
-
   store.deleteBeat(props.barOrderIndex, props.beatOrderIndex);
   eventBus.emit("upd-beat");
 }
@@ -34,28 +32,20 @@ div.icon-container(@click="deleteBeat")
 </template>
 
 <style scoped>
-/* Подключаем Material Icons */
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
 .icon-container {
-  /* display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px; */
   cursor: pointer;
   position: relative;
   top: 15%;
 }
-
 .material-icons {
   font-family: "Material Icons";
   font-size: 24px;
   color: #333;
   transition: color 0.2s ease;
 }
-
 .icon-container:hover .material-icons {
-  color: #f44336; /* Красный цвет при наведении */
+  color: #f44336;
 }
 </style>

@@ -1,7 +1,6 @@
 <script setup>
 import General from "./components/General.vue";
 import { onBeforeMount } from "vue";
-
 import { newStore } from "./store/notesheet-store";
 
 const store = newStore();
@@ -19,9 +18,8 @@ onBeforeMount(async () => {
 
 <style>
 :root {
-  --header-height: 0px; /* Будет обновляться динамически */
+  --header-height: 0px;
 }
-
 body {
   margin: 0;
   padding: 0;

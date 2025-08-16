@@ -8,18 +8,14 @@ import { newStore } from "../store/notesheet-store";
 import { ref } from "vue";
 
 defineOptions({
-  name: "General", // Важно! Именно 'General' с большой буквы
+  name: "General",
 });
 const route = useRoute();
 const router = useRouter();
 const store = newStore();
-// Видимость модалки определяется мета-данными роута
 const isModalVisible = computed(() => route.meta.requiresModal || false);
 const visitedRoutes = ref([]);
 
-// Функция для возврата
-
-// Закрытие модалки через навигацию назад
 const handleModalClose = () => {
   if (window.history.length > 1 && store.getChosenComposition.id) {
     router.push(
@@ -32,12 +28,8 @@ const handleModalClose = () => {
 <template lang="pug">
 div.values 
   Navigation
-  
-  <!-- Основной контент -->
   div.main 
     router-view
-  
-  <!-- Модальное окно -->
   Modal(:isVisible="isModalVisible" @update:isVisible="handleModalClose")
     router-view(name="modal")
   
@@ -54,8 +46,6 @@ div.values
   align-items: center;
 }
 .main {
-  /* width: 80vw; */
-  /* height: 5000px; */
   width: 100%;
   height: 100%;
 }

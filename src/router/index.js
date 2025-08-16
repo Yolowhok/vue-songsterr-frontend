@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-
 import test from "../components/test.vue";
 import App from "../App.vue";
 import General from "../components/General.vue";
@@ -12,18 +11,16 @@ const routes = [
     component: General,
     name: "general",
     children: [
-      // Основной маршрут
       {
         path: "composition/:id/notesheet/:num",
         name: "home",
-        component: Composition, // Прямой импорт
+        component: Composition,
       },
-      // Модальные маршруты
       {
         path: "",
         name: "list",
         components: {
-          modal: () => import("../components/composition/CompositionList.vue"), // Модальный компонент
+          modal: () => import("../components/composition/CompositionList.vue"),
         },
         meta: { requiresModal: true },
       },
@@ -47,21 +44,8 @@ const routes = [
   },
 ];
 
-// const routes = [
-//   {
-//     path: "/compositions",
-//     name: "compositions",
-//     component: test,
-//   },
-//   {
-//     path: "/create/composition",
-//     name: "createComposition",
-//     component: test,
-//   },
-// ];
-
 const router = createRouter({
-  history: createWebHistory(), // режим history вместо hash
+  history: createWebHistory(),
   routes,
 });
 
@@ -70,7 +54,6 @@ router.beforeEach(async (to, from, next) => {
     const store = newStore();
     try {
       await store.fetchComposition(to.params.id);
-      // другие загрузки данных
     } catch (error) {
       console.error("Ошибка загрузки композиции", error);
     }

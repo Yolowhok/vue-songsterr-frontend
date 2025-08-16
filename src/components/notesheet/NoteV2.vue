@@ -37,20 +37,7 @@ const wrapperRef = ref(null);
 const inputRef = ref(null);
 const oldStore = useMyStore();
 
-// const board = ;
-
-// watch(
-//   () => store.notesheets.notesheets[store.notesheetChoise].bars,
-//   (newVal, oldVal) => {
-//     console.log("notesheets изменились", newVal);
-//   }
-// );
-// watchEffect(() => {
-//   console.log("notesheets сейчас:", store.notesheets);
-// });
-
 function startEdit() {
-  // console.log(store.notesheets.notesheets[store.notesheetChoise]);
   editing.value = true;
 
   inputValue.value = props?.notevaluef?.position?.fret;
@@ -58,7 +45,6 @@ function startEdit() {
   nextTick(() => {
     if (inputRef.value) {
       inputRef.value.focus();
-      // При необходимости можно дальше выделить весь текст
       inputRef.value.select();
     }
   });
@@ -109,25 +95,20 @@ function onKeydown(event) {
 function onInput(event) {
   let val = event.target.value;
 
-  // Оставляем только цифры
   val = val.replace(/[^\d ]/g, "");
 
   if (Number(val) <= 24) {
     event.target.value = val;
     inputValue.value = val;
   } else {
-    // Иначе оставляем только последний символ
     event.target.value = val.slice(-1);
     inputValue.value = event.target.value;
   }
 }
 function onClickOutside(event) {
   if (!wrapperRef.value) return;
-
-  // Если клик не внутри этого компонента и оно в режиме редактирования
   if (!wrapperRef.value.contains(event.target) && editing.value) {
     save();
-    // editing.value = false;
   }
 }
 
@@ -168,58 +149,42 @@ onMounted(() => {});
 </template>
 
 <style scoped>
-/* Для браузеров на основе WebKit (Chrome, Safari, Edge) */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
   z-index: 200;
 }
-
-/* Для Firefox */
 input[type="number"] {
   background-color: rgb(111, 0, 255);
   border-radius: 25%;
   color: white;
-  /* color: rgb(204, 75, 75); */
   caret-color: transparent;
   z-index: 100;
 }
 .svg-content {
   position: relative;
-  /* height: 1000%; */
-  /* width: 100%; */
   display: flex;
   justify-content: center;
   text-align: center;
   z-index: 200;
-
   transition: transform 0.3s ease, filter 0.3s ease;
   cursor: pointer;
-
-  /* УДАЛИТЬ */
-  /* max-height: 15px; */
 }
 
 .svg-content:hover {
   transform: scale(1.2);
   z-index: 200;
-
-  /* filter: drop-shadow(0 0px 6px rgba(0, 0, 0, 0.2)); */
 }
-
 .svg-content rect {
   transition: fill-opacity 0.3s ease;
   fill-opacity: 0.1;
   z-index: 200;
 }
-
 .svg-content:hover rect {
   fill-opacity: 1;
   z-index: 200;
 }
-
-/* обертка svg + текст */
 .svg-wrapper {
   position: relative;
   width: 97%;
@@ -228,27 +193,16 @@ input[type="number"] {
 }
 .svg-wrapper:hover {
   transform: scale(1.1);
-
   border-radius: 25%;
-  /* border: solid 2px rgb(131, 38, 251); */
-  /* outline-offset: -2px; */
-  /* Чтобы outline был внутри элемента */
-
   outline: solid 2px rgb(131, 38, 251);
-  /* Заменяем border на outline */
 }
-
-/* сам svg */
 .svg-wrapper svg {
   display: block;
   width: 100%;
   height: 100%;
   z-index: 200;
 }
-
-/* input поверх текста */
 .overlay-input {
-  /* scale: 1.2; */
   color: red;
   position: absolute;
   top: 50%;
@@ -257,22 +211,18 @@ input[type="number"] {
   width: 100%;
   height: 100%;
   font-size: 1.5rem;
-  /* font-weight: bold; */
   text-align: center;
   font-family: inherit;
   color: black;
-
   background: transparent;
   border: none;
   outline: none;
-
   user-select: all;
-  /* Чтобы курсор мыши норм был */
   cursor: text;
   z-index: 200;
 }
 .overlay-input::selection {
-  background-color: #0000; /* цвет фона выделения */
+  background-color: #0000;
   z-index: 200;
 }
 </style>

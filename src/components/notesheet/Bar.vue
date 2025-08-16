@@ -25,53 +25,33 @@ const props = defineProps({
 
 
 
-//- BeatList(:beats="bar.beats" :orderIndex = "props.orderIndex" :barId="props.bar?.id")
 
-const oldStore = useMyStore();
 const store = newStore()
-// watch(
-//   () => store.notesheets.notesheets[store.notesheetChoise].bars,
-
-// );
-
-
 const bar = computed(() => props.bar || []);
-const orderIndex = computed(() => props.orderIndex)
+const showPanel = ref(false);
+const showBarSizePanel = ref(false);
 
 const width = computed(() => {
   const beatsCount = props.bar?.beats?.length || 1;
-  return (beatsCount+2) * 90 ; // вместо 100 можно использовать любое базовое значение ширины одного битa
+  return (beatsCount+2) * 90 ;
 });
 
 watch(
   bar,
   (newVal) => {
     if (newVal) {
-      // console.log("new bar", newVal)
-      // eventBus.emit("update-all-beats");
     }
   }
-  // { immediate: true }
 );
-const showPanel = ref(false);
-const showBarSizePanel = ref(false);
+
 
 function togglePanel() {
-
   eventBus.emit("close-all-beat-panels");
-
   showPanel.value = !showPanel.value;
 }
-function onMouseLeave() {
-  // showPanel.value = false;
-  // скрываем панель при уходе курсора
-}
+
 function toggleBarSizePanel() {
   showBarSizePanel.value = !showBarSizePanel.value;
-
-}
-function onMouseLeaveBarSize() {
-  // showBarSizePanel.value = false;
 }
 function closePanel() {
   console.log("CLOSECLOSECLOSE")
@@ -128,12 +108,12 @@ const handleClickOutside = (event) => {
 
 <template lang="pug">
     div.bar(:style="{ width: width + 'px'}"  )
-        div.annotation(@mouseleave="onMouseLeaveBarSize" )
+        div.annotation()
           div(ref="pupupBarSizePanelRef")
             BarSizeNew(v-if="!showBarSize" @click="toggleBarSizePanel"  )
             
             BarSize(v-if="showBarSize" :bar="props.bar" @click="toggleBarSizePanel" )
-            div.popup-panel-bar-size(v-if="showBarSizePanel" @mouseleave="onMouseLeaveBarSize" )
+            div.popup-panel-bar-size(v-if="showBarSizePanel")
               BarSizePanel( :bar="props.bar")
 
 
@@ -142,7 +122,7 @@ const handleClickOutside = (event) => {
                 BeatList(:beats="bar.beats" :orderIndex = "props.orderIndex" :barId="props.bar?.id" :timeSignature="props?.bar?.timeSignature")
             Lines.lines-content
 
-        div.duration(@mouseleave="onMouseLeave" ) 
+        div.duration() 
           div.three-dots(  ref="popupPanelRef")
             TrashIcon.button.logo(@click="togglePanel") .
             div.popup-panel(v-if="showPanel")
@@ -153,12 +133,9 @@ const handleClickOutside = (event) => {
 
 <style scoped>
 .bar {
-  position: relative; /* Устанавливаем относительное позиционирование для контейнера */
-  /* width: 300px; */
+  position: relative;
   height: 500px;
-  /* height: 400px; */
-  display: flex; /* Если нужно выровнять элементы внутри */
-  /* justify-content: center; Центрируем элементы внутри по горизонтали */
+  display: flex;
   flex-direction: column;
   justify-content: 0;
 }
@@ -172,11 +149,10 @@ const handleClickOutside = (event) => {
   height: 30%;
 }
 .button {
-  /* z-index: 5; */
   display: flex;
   flex-direction: row-reverse;
   opacity: 0;
-  pointer-events: none; /* кнопка не кликабельна, пока скрыта */
+  pointer-events: none;
   transition: opacity 0.3s ease;
 }
 .logo:hover {
@@ -193,49 +169,39 @@ const handleClickOutside = (event) => {
 .three-dots {
   display: flex;
   flex-direction: row-reverse;
-  /* pointer-events: none; */
-  /* кнопка не кликабельна, пока скрыта */
 }
-
 .lines {
   width: 100%;
   height: 40%;
   position: relative;
   display: flex;
-  align-items: center; /* Центрируем элементы внутри по вертикали */
-  justify-content: center; /* Центрируем элементы внутри по горизонтали */
+  align-items: center;
+  justify-content: center;
 }
 .value {
   position: absolute;
   height: 80%;
   width: 100%;
-  z-index: 1; /* Обеспечивает наложение поверх lines */
+  z-index: 1;
 }
 .lines-content {
   height: 80%;
 }
-
 .popup-panel {
   position: absolute;
-  /* чуть выше кнопки */
   right: 0;
   bottom: 0;
   top: 60%;
   left: 80%;
   align-items: center;
-
   width: 150px;
   height: 10%;
-  /* padding: 10px; */
-  /* background: white; */
-  /* border: 1px solid #ccc; */
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
   z-index: 10;
   border-radius: 4px;
 }
 .popup-panel-bar-size {
   position: absolute;
-  bottom: 0px; /* чуть выше кнопки */
+  bottom: 0px;
   right: 0;
   top: 100px;
   left: 50px;
@@ -244,7 +210,6 @@ const handleClickOutside = (event) => {
   padding: 10px;
   background: white;
   border: 1px solid #ccc;
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
   z-index: 10;
   border-radius: 4px;
 }

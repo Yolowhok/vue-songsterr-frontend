@@ -4,11 +4,11 @@ import axios from "axios";
 import { Bar } from "./Bar";
 export class Notesheet {
   constructor(data) {
-    this.id = data.id; // Используем this для создания свойства экземпляра
-    this.instrument = new Instrument(data.instrument); // Создаем новый экземпляр Instrument
+    this.id = data.id;
+    this.instrument = new Instrument(data.instrument);
     this.bars = data.bars.map((barData) => {
       return new Bar(barData);
-    }); // Преобразуем данные в массив объектов Bar
+    });
   }
 
   static create() {

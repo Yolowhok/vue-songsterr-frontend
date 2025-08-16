@@ -37,8 +37,6 @@ function deleteBeat() {
 
   store.deleteBeat(props.barOrderIndex, props.beatOrderIndex);
   eventBus.emit("upd-beat");
-
-  // eventBus.emit("update-all-beats");
 }
 </script>
 
@@ -83,24 +81,16 @@ function deleteBeat() {
   width: 20px;
   height: 30px;
   box-sizing: border-box;
-  /* Убедимся, что переход применяется и по умолчанию */
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
-
-/* Для Ronde: центр по горизонтали, внизу по вертикали */
 .item-container.svg-container:not(.svg-container-half) {
   justify-content: center;
   align-items: flex-end;
 }
-
-/* Для Half: центр по горизонтали и по вертикали */
 .item-container.svg-container.svg-container-half {
   justify-content: center;
   align-items: center;
-  /* justify-content: center; */
-  /* align-items: flex-end; */
 }
-
 .svg-container-quareter {
   justify-content: center;
   align-items: flex-end;
@@ -109,10 +99,8 @@ function deleteBeat() {
   justify-content: center;
   align-items: center;
 }
-
-/* Подсветка svg при наведении на контейнер */
 .item-container.svg-container:hover {
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
-  cursor: pointer; /* по желанию */
+  cursor: pointer;
 }
 </style>

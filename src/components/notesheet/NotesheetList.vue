@@ -6,24 +6,14 @@ import { storeToRefs } from "pinia";
 
 const store = useMyStore();
 const { notesheetsList } = storeToRefs(store);
-
 const router = useRouter();
 const emit = defineEmits(["update:isVisible"]);
-
 const closeModal = () => {
   emit("update:isVisible", false);
 };
-
 function createNewNotesheet() {
   router.push(`/notesheet/create`);
 }
-
-// Функция для закрытия модального окна
-// const closeModal = (compositionId) => {
-//   emit("update:isVisible", false);
-//   console.log("DA");
-//   router.push(`/composition/${compositionId}`);
-// };
 </script>
 
 <template lang="pug">

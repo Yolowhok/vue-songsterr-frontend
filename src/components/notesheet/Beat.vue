@@ -39,11 +39,9 @@ const isHovered = ref(false);
 const showPanel = ref(false);
 const showDeleteIcon = ref(false);
 
-// Создаем ссылки для элементов
 const panelRef = ref(null);
 const buttonRef = ref(null);
 
-// Обработчик закрытия всех панелей
 const closeAllPanels = () => {
   console.log("closeAllPanelscloseAllPanelscloseAllPanelscloseAllPanels");
   showPanel.value = false;
@@ -51,20 +49,17 @@ const closeAllPanels = () => {
   isHovered.value = false;
 };
 
-// Подписываемся на событие закрытия всех панелей
 onMounted(() => {
   eventBus.on("close-all-beat-panels", closeAllPanels);
   document.addEventListener("click", handleClickOutside);
   updateSvgComponent();
 });
 
-// Отписываемся при демонтировании
 onUnmounted(() => {
   eventBus.off("close-all-beat-panels", closeAllPanels);
   document.removeEventListener("click", handleClickOutside);
 });
 
-// Обработчик клика вне панели
 const handleClickOutside = (event) => {
   if (panelRef.value && !panelRef.value.contains(event.target)) {
     showPanel.value = false;
@@ -83,12 +78,9 @@ function onMouseLeave() {
 
 function togglePanel(event) {
   event.stopPropagation();
-  // Отправляем событие для закрытия всех панелей
   eventBus.emit("close-all-beat-panels");
   eventBus.emit("close-bar-panels");
   eventBus.emit("close-bar-size-panel");
-
-  // Открываем текущую панель
   showPanel.value = !showPanel.value;
 }
 
@@ -176,7 +168,6 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
   justify-content: center;
   display: flex;
 }
-
 .delete-beat {
   position: absolute;
   cursor: pointer;
@@ -184,11 +175,9 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
   opacity: 0.7;
   transition: opacity 0.2s ease;
 }
-
 .delete-beat:hover {
   opacity: 1;
 }
-
 .eigth-svg {
   position: absolute;
   top: 110%;
@@ -198,12 +187,10 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
   pointer-events: none;
   z-index: 1;
 }
-
 .beat-wrapper {
   position: relative;
   overflow: visible;
 }
-
 .add-button {
   position: absolute;
   top: 100%;
@@ -215,17 +202,14 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
   border: none;
   color: #000;
 }
-
 .add-button:hover {
   color: rgb(111, 0, 255);
   filter: drop-shadow(0 0 1px rgba(255, 0, 0, 0.3));
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
-
 .add-button:active {
   color: #b83030;
 }
-
 .beat {
   position: relative;
   width: 30px;
@@ -237,7 +221,6 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
   justify-content: left;
   flex-direction: row;
 }
-
 .popup-panel {
   position: absolute;
   bottom: 0px;

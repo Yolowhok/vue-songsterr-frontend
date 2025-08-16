@@ -1,6 +1,4 @@
-<script setup lang="js">
-import { ref, onMounted, reactive, defineProps } from "vue";
-</script>
+<script setup lang="js"></script>
 
 <template lang="pug">
     svg(style="stroke: black; stroke-width: 0.5 ")
@@ -17,10 +15,8 @@ import { ref, onMounted, reactive, defineProps } from "vue";
 
 <style scoped>
 svg {
-  margin: 0; /* Убираем любые отступы у самих svg */
-  padding: 0; /* Убираем любые отступы у самих svg */
-  /* margin-top: 15%; */
-  /* margin-bottom: 15%; */
+  margin: 0;
+  padding: 0;
   width: 100%;
   height: 100%;
 }

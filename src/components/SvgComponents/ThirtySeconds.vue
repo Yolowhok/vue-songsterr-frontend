@@ -21,9 +21,4 @@ const props = defineProps({
         line(:x1="props.points.x1" y1="126" :x2="props.points.x2" y2="126" stroke="black" stroke-width="8")
         line(:x1="props.points.x1" y1="110" :x2="props.points.x2" y2="110" stroke="black" stroke-width="8")
         line(:x1="props.points.x1" y1="94" :x2="props.points.x2" y2="94" stroke="black" stroke-width="8")
-
-        //- line(x1="-100" y1="110" x2="250" y2="110" stroke="black" stroke-width="8")
-        //- line(x1="-100" y1="94" x2="250" y2="94" stroke="black" stroke-width="8")
-        //- line(x1="0" y1="78" x2="150" y2="78" stroke="black" stroke-width="8")
-
 </template>

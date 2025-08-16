@@ -21,8 +21,6 @@ const updateHeaderHeight = () => {
 onMounted(() => {
   updateHeaderHeight();
   window.addEventListener("resize", updateHeaderHeight);
-
-  // Наблюдаем за изменениями в DOM шапки
   const observer = new MutationObserver(updateHeaderHeight);
   if (headerRef.value) {
     observer.observe(headerRef.value, {
@@ -31,7 +29,6 @@ onMounted(() => {
       attributes: true,
     });
   }
-
   onUnmounted(() => {
     window.removeEventListener("resize", updateHeaderHeight);
     observer.disconnect();
@@ -94,31 +91,25 @@ span {
   transform: none !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
-
 .header {
   background-color: #ffffff;
   color: rgb(0, 0, 0);
   font-family: "Roboto", sans-serif;
   width: 100%;
-  position: fixed; /* Меняем sticky на fixed */
+  position: fixed;
   top: 0;
   left: 0;
   z-index: 1001;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  /* Добавляем для плавности */
   transition: transform 0.3s ease;
 }
 .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* max-width: 1200px; */
   max-width: 75%;
-
   justify-content: center;
   margin: 0 auto;
-  /* border-bottom: 0.1vh solid #000000;  */
-  /* Линия снизу: цвет и толщина */
 }
 .link {
   cursor: pointer;
@@ -133,10 +124,8 @@ span {
 }
 .link:hover {
   color: #2b2b2b;
-
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
-
 .navigation {
   list-style: none;
   display: flex;
@@ -147,43 +136,33 @@ span {
   justify-content: center;
   align-items: center;
 }
-
 .navigation li {
-  position: relative; /* Для псевдоэлементов */
+  position: relative;
 }
-
 .navigation a {
-  text-decoration: none; /* Убираем подчеркивание */
-  /* color: rgb(0, 0, 0);  */
+  text-decoration: none;
   color: #6f6f6f;
-  /* Цвет текста */
-  font-weight: 400; /* Тонкий шрифт */
-  /* padding: 0.5rem 1rem; */
-  /* Отступы */
-  transition: color 0.3s, background-color 0.3s; /* Плавный переход */
-  border-radius: 4px; /* Закругленные углы */
+  font-weight: 400;
+  transition: color 0.3s, background-color 0.3s;
+  border-radius: 4px;
 }
 .navigation a:hover {
   color: #000000;
 }
-
 .flex {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
-
 .link-text {
   animation: fadeInDown 0.3s ease forwards;
 }
-
 .header {
   transition: transform 0.3s ease, opacity 0.3s ease;
   transform: translateY(0);
   opacity: 1;
 }
-
 .header--hidden {
   transform: translateY(-100%);
   opacity: 0;

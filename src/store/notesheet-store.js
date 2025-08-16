@@ -102,7 +102,7 @@ export const newStore = defineStore("newStore", {
     async fetchComposition(id) {
       try {
         const response = await getCompositionByIdFull(id);
-        this.composition = response.data; // устанавливаем в state
+        this.composition = response.data;
         console.log("Composition is load");
       } catch (e) {
         console.error("Ошибка при загрузке notesheets", e);
