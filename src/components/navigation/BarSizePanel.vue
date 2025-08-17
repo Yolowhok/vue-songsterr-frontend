@@ -1,6 +1,7 @@
 <script setup>
 import { defineProps, ref, watch } from "vue";
 import { newStore } from "../../store/notesheet-store";
+import eventBus from "../../eventBus";
 
 const props = defineProps({
   bar: Object,
@@ -41,6 +42,7 @@ function confirmBarSize() {
     upper: upper.value || 4,
     lower: lower.value || 4,
   });
+  eventBus.emit("close-bar-size-panel");
 }
 </script>
 

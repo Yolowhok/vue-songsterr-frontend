@@ -43,7 +43,6 @@ const panelRef = ref(null);
 const buttonRef = ref(null);
 
 const closeAllPanels = () => {
-  console.log("closeAllPanelscloseAllPanelscloseAllPanelscloseAllPanels");
   showPanel.value = false;
   showDeleteIcon.value = false;
   isHovered.value = false;

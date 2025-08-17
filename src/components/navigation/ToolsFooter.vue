@@ -16,6 +16,7 @@ const router = useRouter();
 import Modal from "./Modal.vue";
 import { newStore } from "../../store/notesheet-store";
 import NotesheetsListPanel from "./NotesheetsListPanel.vue";
+import eventBus from "../../eventBus";
 const store = newStore();
 const emit = defineEmits(["open-modal"]);
 
@@ -46,7 +47,6 @@ function changeOrientation() {
   store.toggleOrientation();
 }
 function openNotesheetList() {
-  console.log("store.getNotesheetList", store.getNotesheetList);
   isVisible.value = !isVisible.value;
 }
 const openButtonRef = ref(null);
@@ -63,11 +63,17 @@ const handleClickOutside = (event) => {
   }
 };
 
+function closeNotesheetListPanel() {
+  isVisible.value = false;
+}
+
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
+  eventBus.on("close-notesheet-list-panel", closeNotesheetListPanel);
 });
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
+  eventBus.off("close-notesheet-list-panel", closeNotesheetListPanel);
 });
 </script>
 <template lang="pug">

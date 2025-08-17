@@ -22,6 +22,7 @@ onMounted(async () => {
     store.fetchComposition(route.params.id);
     store.setCacheComposition(store.getComposition);
     isLoading.value = false;
+    console.log(store.getComposition);
   } else {
     try {
       await store.fetchComposition(route.params.id);
@@ -32,7 +33,6 @@ onMounted(async () => {
 
       store.setCacheComposition(store.getComposition);
       console.log(store.getComposition);
-      console.log("store.getChosenNotesheet", store.getChosenNotesheet);
       setTimeout(() => {
         isLoading.value = false;
       }, 500);

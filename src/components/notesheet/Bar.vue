@@ -54,26 +54,20 @@ function toggleBarSizePanel() {
   showBarSizePanel.value = !showBarSizePanel.value;
 }
 function closePanel() {
-  console.log("CLOSECLOSECLOSE")
   showPanel.value = false
 }
 const showBarSize = computed(() => {
-  console.log(props.bar)
-
   const bars = store.getComposition.notesheets[store.getChosenNotesheet].bars
   const currentOrderIndex = props.orderIndex
 
-  if (currentOrderIndex == 0) return true // первый бар — показать
+  if (currentOrderIndex == 0) return true
 
-  // Найти предыдущий бар с orderIndex на 1 меньше
   const prevBar = bars.find(b => b.orderIndex === currentOrderIndex - 1)
 
-  if (!prevBar) return true // если нет предыдущего, показать
+  if (!prevBar) return true
 
   const currTS = props.bar?.timeSignature || {}
   const prevTS = prevBar?.timeSignature || {}
-  // console.log(currentOrderIndex, currTS, prevTS)
-  console.log(props.bar)
   return currTS.upper != prevTS.upper || currTS.lower != prevTS.lower
 })
 function closeBarSizePanel() {

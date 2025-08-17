@@ -4,6 +4,7 @@ import { newStore } from "../../store/notesheet-store";
 import { useRouter } from "vue-router";
 import { useRoute } from "vue-router";
 import { computed } from "vue";
+import eventBus from "../../eventBus";
 const router = useRouter();
 const route = useRoute();
 const store = newStore();
@@ -11,6 +12,7 @@ const notesheets = computed(() => store.getNotesheetList);
 
 function chooseNotesheet(i) {
   store.setChosenNotesheet(i);
+
   router.push("/composition/" + store?.getComposition?.id + "/notesheet/" + i);
 }
 function createNotesheet() {

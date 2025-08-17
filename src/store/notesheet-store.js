@@ -364,7 +364,6 @@ export const newStore = defineStore("newStore", {
         // 7. Заменяем оригинал обновленной копией
         this.getComposition.notesheets[this.chosenNotesheet] = notesheetCopy;
         this.checkAllDurations();
-        console.log("Обновлённый список битов:", bar.beats);
       } catch (error) {
         console.error("Ошибка при добавлении бита:", error);
       }
@@ -432,9 +431,6 @@ export const newStore = defineStore("newStore", {
           globalBeatIndex++; // Увеличиваем глобальный счетчик
         });
       });
-
-      console.log("Final beatsPoints:", beatsPoints);
-      console.log("updated all duration points");
       this.points = beatsPoints;
     },
     addBarRight(barIndex) {
@@ -478,7 +474,7 @@ export const newStore = defineStore("newStore", {
         this.getComposition.notesheets[this.chosenNotesheet].bars =
           updatedBarsWithShift;
 
-        console.log("Add bar right is done", newBar);
+        console.log("Add bar right is done");
       } catch (error) {
         console.error("Ошибка при добавлении бара справа:", error);
       }
@@ -524,7 +520,7 @@ export const newStore = defineStore("newStore", {
         this.getComposition.notesheets[this.chosenNotesheet].bars =
           updatedBarsWithShift;
 
-        console.log("Add bar left is done", newBar);
+        console.log("Add bar left is done");
       } catch (error) {
         console.error("Ошибка при добавлении бара слева:", error);
       }
@@ -864,11 +860,7 @@ export const newStore = defineStore("newStore", {
         return;
       }
 
-      // this.timeSignature.then((result) => {
-      //   console.log("timeSignature data:", result.data);
-      // });
       const result = this.timeSignature;
-      console.log(result);
       const matchedTimeSignature = result.data.find(
         (ts) => ts.upper == value.upper && ts.lower == value.lower
       );
@@ -876,7 +868,6 @@ export const newStore = defineStore("newStore", {
         console.warn("matchedTimeSignature not found");
         return;
       }
-      // Найти нужный bar по barOrderIndex
       const bar = currentNoteSheet.bars.find(
         (bar) => bar.orderIndex === barOrderIndex
       );
