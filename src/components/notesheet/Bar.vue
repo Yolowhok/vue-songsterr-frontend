@@ -104,10 +104,10 @@ const handleClickOutside = (event) => {
     div.bar(:style="{ width: width + 'px'}"  )
         div.annotation()
           div(ref="pupupBarSizePanelRef")
-            BarSizeNew(v-if="!showBarSize" @click="toggleBarSizePanel"  )
+            BarSizeNew(v-if="!showBarSize && store.getEditModeStatus" @click="toggleBarSizePanel"  )
             
-            BarSize(v-if="showBarSize" :bar="props.bar" @click="toggleBarSizePanel" )
-            div.popup-panel-bar-size(v-if="showBarSizePanel")
+            BarSize(v-if="showBarSize" :bar="props.bar" @click="toggleBarSizePanel"  )
+            div.popup-panel-bar-size(v-if="showBarSizePanel && store.getEditModeStatus")
               BarSizePanel( :bar="props.bar")
 
 
@@ -117,7 +117,7 @@ const handleClickOutside = (event) => {
             Lines.lines-content
 
         div.duration() 
-          div.three-dots(  ref="popupPanelRef")
+          div.three-dots( v-if="store.getEditModeStatus" ref="popupPanelRef")
             TrashIcon.button.logo(@click="togglePanel") .
             div.popup-panel(v-if="showPanel")
               BarPanel(:bar="bar" :index="bar.value?.orderIndex" )

@@ -41,12 +41,12 @@ div.notesheet-panel(style="position: fixed; z-index: 1000;")
       span.notesheet-name {{ notesheet?.instrument.name || `#${notesheet.id}` }}
       span.notesheet-meta  • {{ notesheet?.tuning?.name}}
 
-  div.panel-controls
+  div.panel-controls(v-if="store.getEditModeStatus")
     div.control-button(@click="createNotesheet()")
       span.material-symbols-outlined add
       span Добавить
 
-    div.control-button.trash(
+    div.control-button.trash(v-if="store.getEditModeStatus"
       @click="deleteNotesheet()"
       :disabled="!route.params.num"
     )

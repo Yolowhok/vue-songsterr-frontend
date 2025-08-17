@@ -41,6 +41,7 @@ export const newStore = defineStore("newStore", {
     instruments: [],
     cachedComposition: null,
     lastCompositionId: null,
+    editModeStatus: false,
   }),
 
   getters: {
@@ -80,6 +81,7 @@ export const newStore = defineStore("newStore", {
     getDuration: (state) => state.durations,
     getPoints: (state) => state.points,
     getDefaultTuning: (state) => state.tunings[0] || [],
+    getEditModeStatus: (state) => state.editModeStatus,
     isCompositionListEmpty: (state) => {
       return (
         Array.isArray(state.compositionList) &&
@@ -876,6 +878,9 @@ export const newStore = defineStore("newStore", {
         return;
       }
       bar.timeSignature = matchedTimeSignature;
+    },
+    changeEditModeStatus() {
+      this.editModeStatus = !this.editModeStatus;
     },
   },
 });

@@ -125,8 +125,8 @@ onMounted(() => {});
 
 <template lang="pug">
     div
-        div.svg-content(@click="startEdit" ref="wrapperRef")
-            div.svg-wrapper.svg-wrapper
+        div.svg-content(@click="startEdit" ref="wrapperRef" :class="{ 'active': store.getEditModeStatus }")
+            div.svg-wrapper.svg-wrapper(:class="{ 'active': store.getEditModeStatus }")
                 svg(viewBox="0 0 100 100")
                       rect(x="0%" y="0%" width="100%" height="100%" rx="25%" ry="25%" fill="white")
                       text(
@@ -138,7 +138,8 @@ onMounted(() => {});
                         dy="0.1em"
                         ) {{ props?.notevaluef?.position?.fret }}
                 input(
-                v-if="editing"
+                v-if="editing && store.getEditModeStatus"
+
                 ref="inputRef"
                 class="overlay-input"
                 type="number"
@@ -169,10 +170,13 @@ input[type="number"] {
   text-align: center;
   z-index: 200;
   transition: transform 0.3s ease, filter 0.3s ease;
+  cursor: default;
+}
+.svg-content.active {
   cursor: pointer;
 }
 
-.svg-content:hover {
+.svg-content.active:hover {
   transform: scale(1.2);
   z-index: 200;
 }
@@ -181,7 +185,7 @@ input[type="number"] {
   fill-opacity: 0.1;
   z-index: 200;
 }
-.svg-content:hover rect {
+.svg-content.active:hover rect {
   fill-opacity: 1;
   z-index: 200;
 }
@@ -191,7 +195,7 @@ input[type="number"] {
   height: 100%;
   z-index: 200;
 }
-.svg-wrapper:hover {
+.svg-wrapper.active:hover {
   transform: scale(1.1);
   border-radius: 25%;
   outline: solid 2px rgb(131, 38, 251);

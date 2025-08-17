@@ -66,6 +66,10 @@ const handleClickOutside = (event) => {
 function closeNotesheetListPanel() {
   isVisible.value = false;
 }
+function changeEditMode() {
+  store.changeEditModeStatus();
+  console.log(store.getEditModeStatus);
+}
 
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
@@ -93,21 +97,27 @@ onUnmounted(() => {
             li
               div.flex
                 button.action-btn
+                  div.link.default(@click="changeOrientation")
+                    i.material-symbols-outlined switch_access_2
+                    span.link-text ИЗМЕНИТЬ РАСПОЛОЖЕНИЕ
+            li
+              div.flex
+                button.action-btn(:class="{ 'active': store.getEditModeStatus }")
+                  div.link.default(@click="changeEditMode")
+                    i.material-symbols-outlined edit_note
+                    span.link-text РЕДАКТИРОВАТЬ
+            li(v-if="store.getEditModeStatus")
+              div.flex
+                button.action-btn
                   div.link.default(@click="saveNotesheet")
                     i.material-symbols-outlined save
                     span.link-text СОХРАНИТЬ
-            li
+            li(v-if="store.getEditModeStatus")
               div.flex
                 button.action-btn
                   div.link.delete(@click="deleteComposition" )
                     i.material-symbols-outlined scan_delete
                     span.link-text УДАЛИТЬ
-            li
-              div.flex
-                button.action-btn
-                  div.link.default(@click="changeOrientation")
-                    i.material-symbols-outlined switch_access_2
-                    span.link-text ИЗМЕНИТЬ РАСПОЛОЖЕНИЕ
 
 </template>
 
@@ -234,6 +244,15 @@ span {
 }
 .delete:hover {
   color: #f44336;
+}
+.active {
+  transform: translateY(1px) !important;
+}
+
+.active .link.default {
+  color: #8326fb !important;
+  /* border-bottom: solid 3px #ffcb46; */
+  border-bottom: solid 3px #4c73fe;
 }
 @keyframes fadeInDown {
   from {

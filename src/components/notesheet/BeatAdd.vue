@@ -20,13 +20,15 @@ const props = defineProps({
 });
 
 const addBeat = () => {
-  store.addBeat(props.barOrderIndex, props.beatOrderIndex);
-  eventBus.emit("upd-beat");
+  if (store.getEditModeStatus) {
+    store.addBeat(props.barOrderIndex, props.beatOrderIndex);
+    eventBus.emit("upd-beat");
+  }
 };
 </script>
 
 <template lang="pug">
-  div.beat(:class="{ visible: visible }")
+  div.beat(:class="[visible ? 'visible' : '', store.getEditModeStatus ? 'active' : '']")
     BeatAdd( alt="Логотип" @click="addBeat()").logo
 </template>
 
@@ -36,7 +38,7 @@ const addBeat = () => {
   height: 100%;
   opacity: 0;
   transition: opacity 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
+  cursor: default;
 }
 .beat.visible .logo {
   opacity: 1;
@@ -50,10 +52,11 @@ const addBeat = () => {
   transition: opacity 0.5s ease, 0.5s ease;
   color: rgb(131, 38, 251);
 }
-.beat:hover .logo {
+.beat.active:hover .logo {
   opacity: 1;
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
   transition: opacity 0.3s ease, filter 0.3s ease;
+  cursor: pointer;
 }
 .beat {
   width: 30px;

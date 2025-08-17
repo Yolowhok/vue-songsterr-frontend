@@ -146,11 +146,11 @@ eventBus.on("upd-beat", () => {
 <template lang="pug">
 div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="position: relative;")
   div.transparent-overlay
-    DeleteBeat.delete-beat(v-if="showDeleteIcon" :barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
+    DeleteBeat.delete-beat(v-if="showDeleteIcon && store.getEditModeStatus" :barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
   div.beat
     NoteList(:beat="props.beat" :orderIndex="props.orderIndex" :barId="props.barId" :beatId="props?.beatId" :beatOrderIndex="props.beatOrderIndex")
   div
-    TrashIcon.add-button.logo(ref="buttonRef" @click="togglePanel" v-if="isHovered" viewBox="0 0 24 24" width="24" height="24") 
+    TrashIcon.add-button.logo(ref="buttonRef" @click="togglePanel" v-if="isHovered && store.getEditModeStatus" viewBox="0 0 24 24" width="24" height="24") 
     div.popup-panel(v-if="showPanel" ref="panelRef")
       BeatPanel(:barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
   component.eigth-svg(v-if="SvgComponent" :is="SvgComponent" :points="svgProps")
