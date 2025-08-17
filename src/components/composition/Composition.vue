@@ -13,7 +13,6 @@ const router = useRouter();
 const isLoading = ref(true);
 
 onMounted(async () => {
-  console.log("store.getCachedComposition", store.getCachedComposition);
   store.setChosenNotesheet(route.params.num);
 
   if (store.getCachedComposition?.id == route.params.id) {

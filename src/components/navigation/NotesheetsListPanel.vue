@@ -2,23 +2,28 @@
 import { nextTick } from "vue";
 import { newStore } from "../../store/notesheet-store";
 import { useRouter } from "vue-router";
-
+import { useRoute } from "vue-router";
+import { computed } from "vue";
 const router = useRouter();
-
+const route = useRoute();
 const store = newStore();
-const notesheets = store.getNotesheetList;
+const notesheets = computed(() => store.getNotesheetList);
 
 function chooseNotesheet(i) {
   store.setChosenNotesheet(i);
   router.push("/composition/" + store?.getComposition?.id + "/notesheet/" + i);
-
-  nextTick();
-  console.log("Route push is done");
 }
 function createNotesheet() {
   router.push(
     "/composition/" + store?.getComposition?.id + "/create/notesheet"
   );
+}
+async function deleteNotesheet() {
+  await store.fetchDeleteNotesheet(route.params.num);
+  await store.fetchComposition(route.params.id);
+  store.setChosenNotesheet(0);
+
+  router.push("/composition/" + store?.getComposition?.id + "/notesheet/" + 0);
 }
 </script>
 
@@ -29,7 +34,7 @@ div.notesheet-panel(style="position: fixed; z-index: 1000;")
       v-for="(notesheet, i) in notesheets"
       :key="notesheet.id"
       @click="chooseNotesheet(i)"
-      :class="{ active: store.chosenNotesheet === notesheet.id }"
+      :class="{ active: i === Number(route.params.num) }"
     )
       span.notesheet-name {{ notesheet?.instrument.name || `#${notesheet.id}` }}
       span.notesheet-meta  • {{ notesheet?.tuning?.name}}
@@ -40,8 +45,8 @@ div.notesheet-panel(style="position: fixed; z-index: 1000;")
       span Добавить
 
     div.control-button.trash(
-      @click="store.deleteNotesheet(store.chosenNotesheet)"
-      :disabled="!store.chosenNotesheet"
+      @click="deleteNotesheet()"
+      :disabled="!route.params.num"
     )
       span.material-symbols-outlined delete
       span Удалить

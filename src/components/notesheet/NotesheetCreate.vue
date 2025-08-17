@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 import { computed } from "vue";
 import { createComposition } from "../../api/compositionAPI";
 import { Composition } from "../../models/Composition";
@@ -25,13 +25,21 @@ const tuning = ref("");
 const url = computed(() => Number(props.id));
 
 async function submitForm() {
-  store.fetchCreateNotesheet({
+  await store.fetchCreateNotesheet({
     instrument: instrument.value,
     tuning: tuning.value,
     compositionID: parseInt(route.params.id),
   });
-  // await store.fetchCreateNotesheet(instrument, tuning);
-  // await store.fetchCompositionNotesheetsList(store.notesheets.id);
+  await store.fetchComposition(route.params.id);
+
+  const num = await store.getComposition?.notesheets.length;
+  store.setChosenNotesheet(num - 1);
+
+  console.log(store.getChosenNotesheet);
+  router.push(
+    "/composition/" + store?.getComposition?.id + "/notesheet/" + (num - 1)
+  );
+  nextTick();
 }
 </script>
 

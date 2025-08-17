@@ -11,7 +11,7 @@ import { getNoteOctavesOrdered } from "../api/notesAPI";
 import { Beat } from "../models/Beat";
 import { getDurations } from "../api/durationAPI";
 import { getTimeSignatures } from "../api/timeSignatureAPI";
-import { saveNotesheet } from "../api/notesheetAPI";
+import { deleteNotesheet, saveNotesheet } from "../api/notesheetAPI";
 // import Notesheet from "../components/notesheet/Notesheet.vue";
 // import { Instrument } from "../models/Instrument";
 import { getInstruments } from "../api/instrumentAPI";
@@ -115,9 +115,18 @@ export const newStore = defineStore("newStore", {
     async fetchCreateNotesheet(data) {
       try {
         console.log(data);
-        await createNotesheet(data);
+        const newNotesheet = await createNotesheet(data);
       } catch (e) {
         console.warn(e);
+      }
+    },
+    async fetchDeleteNotesheet(index) {
+      try {
+        const id = this.getComposition.notesheets[index].id;
+        console.log(id);
+        await deleteNotesheet(id);
+      } catch (e) {
+        console.log(e);
       }
     },
     async fetchNoteOctaveOrdered() {
