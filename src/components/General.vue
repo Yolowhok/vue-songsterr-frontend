@@ -21,6 +21,8 @@ const handleModalClose = () => {
     router.push(
       `/composition/` + store.getChosenComposition.id + `/notesheet/` + 0
     );
+  } else if (window.history.length > 1 && route.params.id) {
+    router.push(`/composition/` + route.params.id + `/notesheet/` + 0);
   }
 };
 </script>

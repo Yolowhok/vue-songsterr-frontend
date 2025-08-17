@@ -62,9 +62,6 @@ div.flex
 .creation-panel {
   width: 100%;
   max-width: 400px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
   padding: 24px;
   position: relative;
   z-index: 10;

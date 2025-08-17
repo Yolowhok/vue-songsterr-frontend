@@ -20,6 +20,7 @@ import { toRaw } from "vue";
 import { Duration } from "../models/Duration";
 import { Composition } from "../models/Composition";
 import { useRouter } from "vue-router";
+import { createNotesheet } from "../api/notesheetAPI";
 
 export const newStore = defineStore("newStore", {
   state: () => ({
@@ -37,6 +38,7 @@ export const newStore = defineStore("newStore", {
       orientation: "nowrap",
     },
     tunings: [],
+    instruments: [],
     cachedComposition: null,
     lastCompositionId: null,
   }),
@@ -60,7 +62,6 @@ export const newStore = defineStore("newStore", {
         return null;
       };
     },
-
     getNotesheetList(state) {
       return this.getComposition?.notesheets ?? [];
     },
@@ -74,6 +75,8 @@ export const newStore = defineStore("newStore", {
     },
     getNoteOctavesOrdered: (state) => state.noteOctaveOrdered,
     getFretboard: (state) => state.fretboard,
+    getInstruments: (state) => state.instruments,
+    getTuningList: (state) => state.tunings,
     getDuration: (state) => state.durations,
     getPoints: (state) => state.points,
     getDefaultTuning: (state) => state.tunings[0] || [],
@@ -107,6 +110,14 @@ export const newStore = defineStore("newStore", {
       } catch (e) {
         console.error("Ошибка при загрузке notesheets", e);
         throw e;
+      }
+    },
+    async fetchCreateNotesheet(data) {
+      try {
+        console.log(data);
+        await createNotesheet(data);
+      } catch (e) {
+        console.warn(e);
       }
     },
     async fetchNoteOctaveOrdered() {
@@ -162,6 +173,13 @@ export const newStore = defineStore("newStore", {
         } else {
           console.error("Ошибка сервера", error);
         }
+      }
+    },
+    async fetchInstruments() {
+      try {
+        this.instruments = (await getInstruments()).data;
+      } catch (e) {
+        console.warn(e);
       }
     },
     setCacheComposition(composition) {

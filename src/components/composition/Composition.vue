@@ -14,10 +14,10 @@ const isLoading = ref(true);
 
 onMounted(async () => {
   console.log("store.getCachedComposition", store.getCachedComposition);
+  store.setChosenNotesheet(route.params.num);
 
   if (store.getCachedComposition?.id == route.params.id) {
     store.setFretboard();
-    store.setChosenNotesheet(route.params.num);
     store.setChosenComposition(store.getCompositionById(route.params.id));
 
     store.fetchComposition(route.params.id);
@@ -29,12 +29,11 @@ onMounted(async () => {
       await store.fetchNoteOctaveOrdered();
 
       store.setFretboard();
-      store.setChosenNotesheet(route.params.num);
       store.setChosenComposition(store.getCompositionById(route.params.id));
 
       store.setCacheComposition(store.getComposition);
       console.log(store.getComposition);
-
+      console.log("store.getChosenNotesheet", store.getChosenNotesheet);
       setTimeout(() => {
         isLoading.value = false;
       }, 500);

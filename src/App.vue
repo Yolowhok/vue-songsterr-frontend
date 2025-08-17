@@ -9,6 +9,7 @@ onBeforeMount(async () => {
   await store.fetchDuration();
   store.fetchTimeSignatures();
   store.fetchTuningList();
+  store.fetchInstruments();
 });
 </script>
 

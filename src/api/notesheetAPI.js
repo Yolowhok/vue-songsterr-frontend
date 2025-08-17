@@ -9,11 +9,6 @@ export function saveNotesheet(data) {
 export function deleteNotesheet(data) {
   return api.post("/notesheet/delete", data);
 }
-
-// export function saveNotesheet(data) {
-//   return axios.post("http://localhost:8080/notesheet/update", data);
-// }
-
-// export function deleteNotesheet(data) {
-//   return axios.post("http://localhost:8080/notesheet/delete", data);
-// }
+export function createNotesheet(data) {
+  return api.post("/notesheet/create", data);
+}

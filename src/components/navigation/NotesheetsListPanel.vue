@@ -1,4 +1,5 @@
 <script setup>
+import { nextTick } from "vue";
 import { newStore } from "../../store/notesheet-store";
 import { useRouter } from "vue-router";
 
@@ -8,8 +9,16 @@ const store = newStore();
 const notesheets = store.getNotesheetList;
 
 function chooseNotesheet(i) {
+  store.setChosenNotesheet(i);
   router.push("/composition/" + store?.getComposition?.id + "/notesheet/" + i);
+
+  nextTick();
   console.log("Route push is done");
+}
+function createNotesheet() {
+  router.push(
+    "/composition/" + store?.getComposition?.id + "/create/notesheet"
+  );
 }
 </script>
 
@@ -26,16 +35,16 @@ div.notesheet-panel(style="position: fixed; z-index: 1000;")
       span.notesheet-meta  • {{ notesheet?.tuning?.name}}
 
   div.panel-controls
-    div.control-button(@click="store.createNewNotesheet()")
+    div.control-button(@click="createNotesheet()")
       span.material-symbols-outlined add
-      span Add New
+      span Добавить
 
     div.control-button.trash(
       @click="store.deleteNotesheet(store.chosenNotesheet)"
       :disabled="!store.chosenNotesheet"
     )
       span.material-symbols-outlined delete
-      span Delete
+      span Удалить
 </template>
 
 <style scoped>

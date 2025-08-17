@@ -5,6 +5,8 @@ import General from "../components/General.vue";
 import { newStore } from "../store/notesheet-store";
 import Composition from "../components/composition/Composition.vue";
 import CompositionCreate from "../components/composition/CompositionCreate.vue";
+import CompositionList from "../components/composition/CompositionList.vue";
+import NotesheetCreate from "../components/notesheet/NotesheetCreate.vue";
 const routes = [
   {
     path: "/",
@@ -17,10 +19,10 @@ const routes = [
         component: Composition,
       },
       {
-        path: "",
+        path: "/",
         name: "list",
         components: {
-          modal: () => import("../components/composition/CompositionList.vue"),
+          modal: CompositionList,
         },
         meta: { requiresModal: true },
       },
@@ -33,10 +35,10 @@ const routes = [
         meta: { requiresModal: true },
       },
       {
-        path: "composition/:id/notesheetList",
-        name: "test",
+        path: "composition/:id/create/notesheet",
+        name: "NotesheetCreate",
         components: {
-          modal: () => import("../components/test.vue"),
+          modal: NotesheetCreate,
         },
         meta: { requiresModal: true },
       },
