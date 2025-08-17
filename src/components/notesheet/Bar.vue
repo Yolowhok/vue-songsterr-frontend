@@ -23,9 +23,6 @@ const props = defineProps({
   }
 });
 
-
-
-
 const store = newStore()
 const bar = computed(() => props.bar || []);
 const showPanel = ref(false);
@@ -104,18 +101,14 @@ const handleClickOutside = (event) => {
     div.bar(:style="{ width: width + 'px'}"  )
         div.annotation()
           div(ref="pupupBarSizePanelRef")
-            BarSizeNew(v-if="!showBarSize && store.getEditModeStatus" @click="toggleBarSizePanel"  )
-            
+            BarSizeNew(v-if="!showBarSize && store.getEditModeStatus" @click="toggleBarSizePanel")
             BarSize(v-if="showBarSize" :bar="props.bar" @click="toggleBarSizePanel"  )
             div.popup-panel-bar-size(v-if="showBarSizePanel && store.getEditModeStatus")
               BarSizePanel( :bar="props.bar")
-
-
         div.lines
             div.value
                 BeatList(:beats="bar.beats" :orderIndex = "props.orderIndex" :barId="props.bar?.id" :timeSignature="props?.bar?.timeSignature")
             Lines.lines-content
-
         div.duration() 
           div.three-dots( v-if="store.getEditModeStatus" ref="popupPanelRef")
             TrashIcon.button.logo(@click="togglePanel") .
