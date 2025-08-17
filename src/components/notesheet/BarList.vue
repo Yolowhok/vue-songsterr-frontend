@@ -9,9 +9,6 @@ const bars = computed(
   () => store.getComposition?.notesheets[store.getChosenNotesheet]?.bars
 );
 
-`position: absolute;
-    padding-left: 100px;`;
-
 const orientation = computed(() => store.settings.orientation);
 </script>
 
@@ -35,7 +32,7 @@ const orientation = computed(() => store.settings.orientation);
   padding-left: 100px;
   padding-right: 100px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .forBar {

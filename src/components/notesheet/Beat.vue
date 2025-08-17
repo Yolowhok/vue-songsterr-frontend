@@ -155,6 +155,7 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
       BeatPanel(:barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
   component.eigth-svg(v-if="SvgComponent" :is="SvgComponent" :points="svgProps")
 </template>
+
 <style scoped>
 .transparent-overlay {
   position: absolute;
