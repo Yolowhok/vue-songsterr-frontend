@@ -1,6 +1,8 @@
 import { Notesheet } from "./Notesheet";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+
 export class Composition {
   constructor(data) {
     (this.id = data.id),
@@ -36,7 +38,7 @@ export class Composition {
 
 export const getCompositionsById = async (compositions, id) => {
   try {
-    const response = await axios.get(`http://localhost:8080/composition/${id}`);
+    const response = await axios.get(`${API_BASE_URL}/composition/${id}`);
     compositions.value = new Composition(response.data);
   } catch (error) {
     console.error("Ошибка при fetching данных:", error);
@@ -44,9 +46,7 @@ export const getCompositionsById = async (compositions, id) => {
 };
 export const getCompositionsByIdFull = async (compositions, id) => {
   try {
-    const response = await axios.get(
-      `http://localhost:8080/composition/${id}/full`
-    );
+    const response = await axios.get(`${API_BASE_URL}/composition/${id}/full`);
     compositions.value = new Composition(response.data);
   } catch (error) {
     console.error("Ошибка при fetching данных:", error);
@@ -55,7 +55,7 @@ export const getCompositionsByIdFull = async (compositions, id) => {
 
 export const getCompositions = async (compositions) => {
   try {
-    const response = await axios.get(`http://localhost:8080/compositions`);
+    const response = await axios.get(`${API_BASE_URL}/compositions`);
     compositions.value = response.data.map(
       (compositionData) => new Composition(compositionData)
     );

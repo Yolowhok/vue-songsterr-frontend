@@ -2,6 +2,8 @@ import { Instrument } from "./Instrument";
 import { Composition } from "./Composition";
 import axios from "axios";
 import { Bar } from "./Bar";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 export class Notesheet {
   constructor(data) {
     this.id = data.id;
@@ -37,7 +39,7 @@ export class Notesheet {
 }
 export const getNotesheetById = async (notesheet, id) => {
   try {
-    const response = await axios.get(`http://localhost:8080/notesheet/${id}`);
+    const response = await axios.get(`${API_BASE_URL}/notesheet/${id}`);
     notesheet.value = new Notesheet(response.data);
   } catch (error) {
     console.error("Ошибка при fetching данных:", error);
