@@ -26,33 +26,30 @@ function createNewNotesheet() {
 
 <style scoped>
 .list {
-  display: flex; /* Используем flexbox для центрирования */
-  flex-direction: column; /* Указываем направление по вертикали */
-  align-items: center; /* Центрируем по горизонтали */
-  justify-content: center; /* Центрируем по вертикали */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   top: 0%;
   padding-bottom: 10px;
 }
 button {
-  background-color: #ffffff; /* приятный зеленый */
-  color: rgb(0, 0, 0); /* белый текст */
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
   border: none;
-  padding: 12px 24px; /* внутренние отступы */
-  font-size: 16px; /* размер текста */
-  font-weight: 600; /* чуть жирнее */
-  border-radius: 8px; /* скругленные углы */
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* лёгкая тень */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
-
 button:hover {
-  /* background-color: #000000; чуть темнее при наведении */
-  transform: translateY(-2px); /* небольшой подъём */
+  transform: translateY(-2px);
 }
-
 button:active {
-  background-color: #cf00dd9d; /* ещё темнее при нажатии */
+  background-color: #cf00dd9d;
   transform: translateY(0);
 }
 </style>

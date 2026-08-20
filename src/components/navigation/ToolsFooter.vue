@@ -15,34 +15,40 @@ const route = useRoute();
 const router = useRouter();
 import Modal from "./Modal.vue";
 import { newStore } from "../../store/notesheet-store";
+import ConfirmationPanel from "./ConfirmationPanel.vue";
 import NotesheetsListPanel from "./NotesheetsListPanel.vue";
 import eventBus from "../../eventBus";
 const store = newStore();
 const emit = defineEmits(["open-modal"]);
 
 const isVisible = ref(false);
+const confirmationPanelIsVisible = ref(false);
 const openModal = () => {
   emit("open-modal");
 };
 const isModalVisible = ref(false);
 const panelRef = ref(null);
+const openButtonSaveConfirmationRef = ref(null);
+const openButtonDeleteConfirmationRef = ref(null);
+
+const confirmationPanelRef = ref(null);
 const props = defineProps({
   store: {
     type: Object,
   },
 });
-function saveNotesheet() {
-  store.fetchSaveNotesheet(
-    store.getComposition?.notesheets[store.getChosenNotesheet]
-  );
-}
-async function deleteComposition() {
-  await store.fetchDeleteComposition(route.params.id);
-  store.setChosenComposition(null);
-  await store.fetchCompositionList();
-  await router.push("/?refresh=1");
-  await nextTick();
-}
+// async function saveNotesheet() {
+//   await store.fetchSaveNotesheet(
+//     store.getComposition?.notesheets[store.getChosenNotesheet]
+//   );
+// }
+// async function deleteComposition() {
+//   await store.fetchDeleteComposition(route.params.id);
+//   store.setChosenComposition(null);
+//   await store.fetchCompositionList();
+//   await router.push("/?refresh=1");
+//   await nextTick();
+// }
 function changeOrientation() {
   store.toggleOrientation();
 }
@@ -62,23 +68,100 @@ const handleClickOutside = (event) => {
     isVisible.value = false;
   }
 };
-
+const handleClickOutsideForConfirmPanel = (event) => {
+  if (
+    confirmationPanelIsVisible.value &&
+    confirmationPanelRef.value &&
+    (openButtonSaveConfirmationRef || openButtonDeleteConfirmationRef) &&
+    !confirmationPanelRef.value.$el.contains(event.target) &&
+    !(
+      openButtonSaveConfirmationRef.value.contains(event.target) ||
+      openButtonDeleteConfirmationRef.value.contains(event.target)
+    )
+  ) {
+    confirmationPanelIsVisible.value = false;
+  }
+};
 function closeNotesheetListPanel() {
   isVisible.value = false;
 }
 function changeEditMode() {
   store.changeEditModeStatus();
   console.log(store.getEditModeStatus);
+  confirmationPanelIsVisible.value = false;
 }
 
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
+  document.addEventListener("click", handleClickOutsideForConfirmPanel);
   eventBus.on("close-notesheet-list-panel", closeNotesheetListPanel);
 });
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
+  document.removeEventListener("click", handleClickOutsideForConfirmPanel);
+
   eventBus.off("close-notesheet-list-panel", closeNotesheetListPanel);
 });
+
+function openConfirmationPanel() {
+  confirmationPanelIsVisible.value = !confirmationPanelIsVisible.value;
+}
+const confirmationModal = reactive({
+  visible: false,
+  title: "",
+  message: "",
+  action: null,
+  isProcessing: false,
+});
+function showConfirmation(action, title, message) {
+  confirmationModal.title = title;
+  confirmationModal.message = message;
+  confirmationModal.action = action;
+  confirmationModal.visible = true;
+  confirmationModal.isProcessing = false;
+}
+async function executeConfirmedAction() {
+  confirmationModal.isProcessing = true;
+  try {
+    await confirmationModal.action();
+    setTimeout(() => {
+      confirmationModal.isProcessing = false;
+    }, 1500);
+  } finally {
+    setTimeout(() => {
+      confirmationModal.isProcessing = false;
+    }, 1500);
+  }
+}
+async function saveNotesheet() {
+  openConfirmationPanel();
+  showConfirmation(
+    () => {
+      store.fetchSaveNotesheet(
+        store.getComposition?.notesheets[store.getChosenNotesheet]
+      );
+      console.log("Saved");
+    },
+    "Подтверждение сохранения",
+    "Вы уверены, что хотите сохранить изменения?"
+  );
+}
+
+async function deleteComposition() {
+  openConfirmationPanel();
+  showConfirmation(
+    async () => {
+      await store.fetchDeleteComposition(route.params.id);
+      store.setChosenComposition(null);
+      await store.fetchCompositionList();
+      await router.push("/?refresh=1");
+      await nextTick();
+      console.log("Deleted");
+    },
+    "Подтверждение удаления",
+    "Вы уверены, что хотите удалить эту композицию? Это действие нельзя отменить."
+  );
+}
 </script>
 <template lang="pug">
 
@@ -108,16 +191,22 @@ onUnmounted(() => {
                     span.link-text РЕДАКТИРОВАТЬ
             li(v-if="store.getEditModeStatus")
               div.flex
-                button.action-btn
-                  div.link.default(@click="saveNotesheet")
+                button.action-btn(ref="openButtonSaveConfirmationRef" @click="saveNotesheet")
+                  div.link.default
                     i.material-symbols-outlined save
                     span.link-text СОХРАНИТЬ
             li(v-if="store.getEditModeStatus")
               div.flex
-                button.action-btn
-                  div.link.delete(@click="deleteComposition" )
+                button.action-btn(ref="openButtonDeleteConfirmationRef" @click="deleteComposition" )
+                  div.link.delete
                     i.material-symbols-outlined scan_delete
                     span.link-text УДАЛИТЬ
+      ConfirmationPanel(v-if="confirmationPanelIsVisible"   ref="confirmationPanelRef"
+                        :title="confirmationModal.title",
+                        :message="confirmationModal.message",
+                        :isProcessing="confirmationModal.isProcessing",
+                        @confirm="executeConfirmedAction",
+                        @cancel="confirmationModal.visible = false")
 
 </template>
 

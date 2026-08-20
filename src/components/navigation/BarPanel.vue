@@ -64,7 +64,6 @@ div.panel
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .icon-wrapper {
   display: flex;
   align-items: center;
@@ -76,31 +75,18 @@ div.panel
   transition: all 0.2s ease;
   position: relative;
 }
-
-.icon-wrapper:hover {
-  /* background: #e0e0e0; */
-}
-
-.icon-wrapper.trash:hover {
-  /* background: #ffebee; */
-}
-
 .material-icons-round {
   font-family: "Material Icons Round";
   font-size: 20px;
   color: #555;
   user-select: none;
 }
-
 .icon-wrapper:hover .material-icons-round {
   color: #1976d2;
 }
-
 .trash:hover .material-icons-round {
   color: #e53935;
 }
-
-/* Комбинированные иконки для добавления */
 .icon-wrapper span:first-child {
   position: absolute;
   left: 4px;

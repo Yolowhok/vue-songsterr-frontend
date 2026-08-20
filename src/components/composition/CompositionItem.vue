@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, ref } from "vue";
+import { reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
 import { newStore } from "../../store/notesheet-store";
