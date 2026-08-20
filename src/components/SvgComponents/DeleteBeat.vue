@@ -1,6 +1,5 @@
 <script setup>
 import { defineProps, computed } from "vue";
-import { useMyStore } from "../../store/notesheet-store";
 import Ronde from "../../assets/Ronde.svg";
 import Quarter from "../../assets/QUARTER.svg";
 import Half from "../../assets/half.svg";
@@ -17,7 +16,6 @@ const props = defineProps({
   beatOrderIndex: Number,
 });
 
-const storePinia = useMyStore();
 const store = newStore();
 
 function deleteBeat() {

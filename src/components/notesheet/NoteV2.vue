@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from "vue";
 
-import { useMyStore } from "../../store/notesheet-store";
 import { newStore } from "../../store/notesheet-store";
 
 const store = newStore();
@@ -35,7 +34,6 @@ const editing = ref(false);
 const inputValue = ref(number.value);
 const wrapperRef = ref(null);
 const inputRef = ref(null);
-const oldStore = useMyStore();
 
 function startEdit() {
   editing.value = true;

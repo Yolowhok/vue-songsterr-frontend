@@ -1,11 +1,11 @@
 <script setup>
-import { useMyStore } from "../../store/notesheet-store";
 import NotesheetItem from "./NotesheetItem.vue";
 import { useRouter } from "vue-router";
-import { storeToRefs } from "pinia";
+import { computed } from "vue";
+import { newStore } from "../../store/notesheet-store";
 
-const store = useMyStore();
-const { notesheetsList } = storeToRefs(store);
+const store = newStore();
+const notesheetsList = computed(() => store.getNotesheetList);
 const router = useRouter();
 const emit = defineEmits(["update:isVisible"]);
 const closeModal = () => {

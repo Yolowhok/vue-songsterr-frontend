@@ -1,6 +1,5 @@
 <script setup>
 import BeatAdd from "../../assets/BeatAdd.svg"; // или '../assets/logo.svg' в зависимости от структуры
-import { useMyStore } from "../../store/notesheet-store";
 import { newStore } from "../../store/notesheet-store";
 import { defineProps, watch } from "vue";
 import eventBus from "../../eventBus";

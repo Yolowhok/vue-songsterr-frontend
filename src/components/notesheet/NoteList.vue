@@ -1,6 +1,5 @@
 <script setup>
 import NoteV2 from "./NoteV2.vue";
-import { useMyStore } from "../../store/notesheet-store";
 const props = defineProps({
   beat: {
     type: Object,
@@ -19,7 +18,6 @@ const props = defineProps({
   },
 });
 
-const store = useMyStore();
 
 function getNoteValue(numberString) {
   if (!props.beat?.beatNotes) return { id: 0 };

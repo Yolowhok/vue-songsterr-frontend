@@ -4,7 +4,6 @@ import Lines from "./Lines.vue";
 import Beat from "./Beat.vue";
 import BeatList from "./BeatList.vue";
 import BarPanel from "../navigation/BarPanel.vue";
-import { useMyStore } from "../../store/notesheet-store";
 import TrashIcon from "../../assets/dots.svg"; // или '../assets/logo.svg' в зависимости от структуры
 import Eigth from "../SvgComponents/Eigth.vue";
 import BarSize from "../SvgComponents/BarSize.vue";

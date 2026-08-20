@@ -8,7 +8,6 @@ import {
   onUnmounted,
 } from "vue";
 import NoteList from "./NoteList.vue";
-import { useMyStore } from "../../store/notesheet-store";
 import BeatPanel from "../navigation/BeatPanel.vue";
 import TrashIcon from "../../assets/menuLines.svg";
 import Eigth from "../SvgComponents/Eigth.vue";
@@ -33,7 +32,6 @@ const props = defineProps({
   points: Object,
 });
 
-const oldStore = useMyStore();
 
 const isHovered = ref(false);
 const showPanel = ref(false);

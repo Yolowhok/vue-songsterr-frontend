@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import test from "../components/test.vue";
-import App from "../App.vue";
 import General from "../components/General.vue";
 import { newStore } from "../store/notesheet-store";
 import Composition from "../components/composition/Composition.vue";

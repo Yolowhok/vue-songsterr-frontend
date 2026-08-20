@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps } from "vue";
-import { useMyStore } from "../../store/notesheet-store";
+import { newStore } from "../../store/notesheet-store";
 const props = defineProps({
   notesheet: {
     type: Object,
@@ -10,10 +10,10 @@ const props = defineProps({
   },
 });
 
-const store = useMyStore();
+const store = newStore();
 
 function loadComposition(id) {
-  store.fetchSetNotesheetChoise(props.index);
+  store.setChosenNotesheet(props.index);
 }
 </script>
 

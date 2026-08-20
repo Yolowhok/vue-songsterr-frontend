@@ -1,11 +1,9 @@
 <script setup>
 import { defineProps, computed } from "vue";
-import { useMyStore } from "../../store/notesheet-store";
 import { newStore } from "../../store/notesheet-store";
 import eventBus from "../../eventBus";
 
 const store = newStore();
-const storePinia = useMyStore();
 const props = defineProps({
   bar: {
     type: Object,

@@ -3,7 +3,6 @@ import Beat from "./Beat.vue";
 import BeatAdd from "./BeatAdd.vue";
 import { watch, defineProps, ref, onBeforeMount, onUpdated } from "vue";
 import { computed, toRefs, reactive } from "vue";
-import { useMyStore } from "../../store/notesheet-store";
 import { newStore } from "../../store/notesheet-store";
 import eventBus from "../../eventBus";
 

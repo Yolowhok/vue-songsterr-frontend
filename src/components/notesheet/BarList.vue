@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, watch, onUpdated, computed, nextTick } from "vue";
-import { useMyStore } from "../../store/notesheet-store";
 import { newStore } from "../../store/notesheet-store";
 import Bar from "./Bar.vue";
 const store = newStore();

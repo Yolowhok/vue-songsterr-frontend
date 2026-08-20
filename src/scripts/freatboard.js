@@ -1,4 +1,3 @@
-import { useMyStore } from "../store/notesheet-store";
 import { newStore } from "../store/notesheet-store";
 
 export function getFretboard() {

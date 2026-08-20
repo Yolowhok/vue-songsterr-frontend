@@ -4,7 +4,6 @@ import { computed } from "vue";
 import { createComposition } from "../../api/compositionAPI";
 import { Composition } from "../../models/Composition";
 import { useRoute, useRouter } from "vue-router";
-import { useMyStore } from "../../store/notesheet-store";
 import { newStore } from "../../store/notesheet-store";
 
 const store = newStore();
