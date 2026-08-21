@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 
 import { useCompositionStore } from "@/entities/composition";
 
@@ -34,6 +34,38 @@ const editing = ref(false);
 const inputValue = ref(number.value);
 const wrapperRef = ref(null);
 const inputRef = ref(null);
+
+const isSelected = computed(() => {
+  const c = store.cursor;
+  if (!c || !store.getEditModeStatus) return false;
+  return (
+    c.barOrder === props.orderIndex &&
+    c.beatOrder === props.beatOrderIndex &&
+    c.string === props.numberString
+  );
+});
+
+function selectCell() {
+  if (!store.getEditModeStatus) return;
+  store.setCursor({
+    barOrder: props.orderIndex,
+    beatOrder: props.beatOrderIndex,
+    string: props.numberString,
+  });
+}
+
+function onCellClick() {
+  if (!store.getEditModeStatus) return;
+  const already =
+    store.cursor &&
+    store.cursor.barOrder === props.orderIndex &&
+    store.cursor.beatOrder === props.beatOrderIndex &&
+    store.cursor.string === props.numberString;
+  selectCell();
+  if (already) {
+    startEdit();
+  }
+}
 
 function startEdit() {
   editing.value = true;
@@ -85,9 +117,34 @@ function cancel() {
 }
 function onKeydown(event) {
   if (event.key === "Enter") {
+    event.preventDefault();
     save();
   } else if (event.key === "Escape") {
+    event.preventDefault();
     cancel();
+  } else if (
+    event.key === "ArrowLeft" ||
+    event.key === "ArrowRight" ||
+    event.key === "ArrowUp" ||
+    event.key === "ArrowDown"
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+    cancel();
+    selectCell();
+    if (event.shiftKey && event.key === "ArrowRight") {
+      store.insertBarRightAtCursor();
+    } else if (event.shiftKey && event.key === "ArrowLeft") {
+      store.insertBarLeftAtCursor();
+    } else if (event.key === "ArrowRight") {
+      store.moveCursor(1, 0);
+    } else if (event.key === "ArrowLeft") {
+      store.moveCursor(-1, 0);
+    } else if (event.key === "ArrowDown") {
+      store.moveCursor(0, 1);
+    } else if (event.key === "ArrowUp") {
+      store.moveCursor(0, -1);
+    }
   }
 }
 function onInput(event) {
@@ -110,6 +167,12 @@ function onClickOutside(event) {
   }
 }
 
+watch(isSelected, (selected) => {
+  if (!selected && editing.value) {
+    cancel();
+  }
+});
+
 onMounted(() => {
   document.addEventListener("click", onClickOutside);
 });
@@ -117,14 +180,20 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener("click", onClickOutside);
 });
-
-onMounted(() => {});
 </script>
 
 <template lang="pug">
-    div
-        div.svg-content(@click="startEdit" ref="wrapperRef" :class="{ 'active': store.getEditModeStatus }")
-            div.svg-wrapper.svg-wrapper(:class="{ 'active': store.getEditModeStatus }")
+    div(
+      :data-tab-cell="`${props.orderIndex}-${props.beatOrderIndex}-${props.numberString}`"
+    )
+        div.svg-content(
+          @click="onCellClick"
+          ref="wrapperRef"
+          :class="{ 'active': store.getEditModeStatus, 'cursor-selected': isSelected }"
+        )
+            div.svg-wrapper.svg-wrapper(
+              :class="{ 'active': store.getEditModeStatus, 'cursor-selected': isSelected }"
+            )
                 svg(viewBox="0 0 100 100")
                       rect(x="0%" y="0%" width="100%" height="100%" rx="25%" ry="25%" fill="white")
                       text(
@@ -187,6 +256,9 @@ input[type="number"] {
   fill-opacity: 1;
   z-index: 200;
 }
+.svg-content.cursor-selected rect {
+  fill-opacity: 1;
+}
 .svg-wrapper {
   position: relative;
   width: 97%;
@@ -197,6 +269,11 @@ input[type="number"] {
   transform: scale(1.1);
   border-radius: 25%;
   outline: solid 2px rgb(131, 38, 251);
+}
+.svg-wrapper.cursor-selected {
+  border-radius: 25%;
+  outline: solid 2px #4c73fe;
+  transform: scale(1.08);
 }
 .svg-wrapper svg {
   display: block;

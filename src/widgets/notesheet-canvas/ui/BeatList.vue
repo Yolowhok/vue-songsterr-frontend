@@ -37,8 +37,8 @@ onUpdated(() => {});
 <template lang="pug">
     div.BeatList
         BeatAdd( :barOrderIndex="props.orderIndex" :beatOrderIndex="-1" :visible="false")
-        div.beat-wrapper(v-for="beat, index in props.beats" :key="beat.id" style="position: relative;")
-          Beat(:beat="beat" :id="beat.id" :orderIndex="props.orderIndex" :barId="props.barId" :beatId="beat?.id" :beatOrderIndex="beat.orderIndex"  )
+        div.beat-wrapper(v-for="beat, index in props.beats" :key="beat.orderIndex" style="position: relative;")
+          Beat(:beat="beat" :orderIndex="props.orderIndex" :barId="props.barId" :beatId="beat?.id" :beatOrderIndex="beat.orderIndex")
           BeatAdd.added.overlay(v-if="beat.beatNotes.length < 1 " :beatOrderIndex="-1" :visible="true")
 
         BeatAdd( :barOrderIndex="props.orderIndex" :beatOrderIndex="lastOrderIndex" :visible="false")

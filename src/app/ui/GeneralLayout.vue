@@ -17,7 +17,8 @@ const isModalVisible = computed(() => route.meta.requiresModal || false);
 const visitedRoutes = ref([]);
 
 const handleModalClose = () => {
-  if (window.history.length > 1 && store.getChosenComposition.id) {
+  if (!route.meta.requiresModal) return;
+  if (window.history.length > 1 && store.getChosenComposition?.id) {
     router.push(
       `/composition/` + store.getChosenComposition.id + `/notesheet/` + 0
     );

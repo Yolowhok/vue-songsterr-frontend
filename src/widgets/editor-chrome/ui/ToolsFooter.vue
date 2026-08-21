@@ -135,17 +135,7 @@ async function executeConfirmedAction() {
   }
 }
 async function saveNotesheet() {
-  openConfirmationPanel();
-  showConfirmation(
-    () => {
-      store.fetchSaveNotesheet(
-        store.getComposition?.notesheets[store.getChosenNotesheet]
-      );
-      console.log("Saved");
-    },
-    "Подтверждение сохранения",
-    "Вы уверены, что хотите сохранить изменения?"
-  );
+  await store.saveCompositionNow();
 }
 
 async function deleteComposition() {
@@ -190,18 +180,46 @@ async function deleteComposition() {
                   div.link.default(@click="changeEditMode")
                     i.material-symbols-outlined edit_note
                     span.link-text РЕДАКТИРОВАТЬ
+            li
+              div.flex
+                button.action-btn(@click="store.togglePlayback()")
+                  div.link.default
+                    i.material-symbols-outlined {{ store.isPlaying ? 'pause' : 'play_arrow' }}
+                    span.link-text {{ store.isPlaying ? 'ПАУЗА' : 'PLAY' }}
+            li(v-if="store.isPlaying || store.playhead")
+              div.flex
+                button.action-btn(@click="store.stopPlayback()")
+                  div.link.default
+                    i.material-symbols-outlined stop
+                    span.link-text СТОП
             li(v-if="store.getEditModeStatus")
               div.flex
                 button.action-btn(ref="openButtonSaveConfirmationRef" @click="saveNotesheet")
                   div.link.default
                     i.material-symbols-outlined save
                     span.link-text СОХРАНИТЬ
+            li(v-if="store.getEditModeStatus && store.canUndo")
+              div.flex
+                button.action-btn(@click="store.undo()")
+                  div.link.default
+                    i.material-symbols-outlined undo
+                    span.link-text ОТМЕНИТЬ
+            li(v-if="store.getEditModeStatus && store.canRedo")
+              div.flex
+                button.action-btn(@click="store.redo()")
+                  div.link.default
+                    i.material-symbols-outlined redo
+                    span.link-text ВЕРНУТЬ
             li(v-if="store.getEditModeStatus")
               div.flex
                 button.action-btn(ref="openButtonDeleteConfirmationRef" @click="deleteComposition" )
                   div.link.delete
                     i.material-symbols-outlined scan_delete
                     span.link-text УДАЛИТЬ
+      span.save-status(
+        v-if="store.saveStatusLabel"
+        :class="{ dirty: store.isDirty, saving: store.isSaving, error: !!store.saveError }"
+      ) {{ store.saveStatusLabel }}
       ConfirmationPanel(v-if="confirmationPanelIsVisible"   ref="confirmationPanelRef"
                         :title="confirmationModal.title",
                         :message="confirmationModal.message",
@@ -228,6 +246,30 @@ async function deleteComposition() {
   box-sizing: border-box;
   z-index: 10;
   padding: 0 20px;
+}
+.save-status {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #8a8a8a;
+  white-space: nowrap;
+  pointer-events: none;
+  max-width: 9rem;
+  text-align: right;
+  line-height: 1.2;
+}
+.save-status.dirty {
+  color: #b45309;
+}
+.save-status.saving {
+  color: #4c73fe;
+}
+.save-status.error {
+  color: #c62828;
 }
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;

@@ -81,6 +81,24 @@ function togglePanel(event) {
   showPanel.value = !showPanel.value;
 }
 
+function onBeatSeek(event) {
+  if (
+    event.target.closest?.(
+      ".delete-beat, .add-button, .popup-panel, .overlay-input, .playhead-line"
+    )
+  ) {
+    return;
+  }
+  const rect = event.currentTarget.getBoundingClientRect();
+  const progress =
+    rect.width > 0 ? (event.clientX - rect.left) / rect.width : 0;
+  store.seekPlayback(
+    props.orderIndex,
+    props.beatOrderIndex,
+    Math.min(1, Math.max(0, progress))
+  );
+}
+
 const SvgComponent = ref(null);
 
 const svgProps = computed(() => {
@@ -94,6 +112,15 @@ const svgProps = computed(() => {
 });
 
 const currentDuration = computed(() => props.beat?.duration?.name);
+
+const isPlayheadBeat = computed(() => {
+  const ph = store.playhead;
+  return (
+    !!ph &&
+    ph.barOrder === props.orderIndex &&
+    ph.beatOrder === props.beatOrderIndex
+  );
+});
 
 function updateSvgComponent() {
   if (!currentDuration.value) return;
@@ -142,7 +169,14 @@ eventBus.on("upd-beat", () => {
 </script>
 
 <template lang="pug">
-div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="position: relative;")
+div.beat-wrapper(
+  @mouseenter="onMouseEnter"
+  @mouseleave="onMouseLeave"
+  @click="onBeatSeek"
+  style="position: relative;"
+  :data-playhead-beat="`${props.orderIndex}-${props.beatOrderIndex}`"
+  :class="{ 'playhead-active': isPlayheadBeat }"
+)
   div.transparent-overlay
     DeleteBeat.delete-beat(v-if="showDeleteIcon && store.getEditModeStatus" :barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
   div.beat
@@ -218,6 +252,10 @@ div.beat-wrapper(@mouseenter="onMouseEnter" @mouseleave="onMouseLeave" style="po
   align-items: center;
   justify-content: left;
   flex-direction: row;
+}
+.playhead-active .beat {
+  background: rgba(131, 38, 251, 0.08);
+  border-radius: 4px;
 }
 .popup-panel {
   position: absolute;

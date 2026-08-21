@@ -25,7 +25,7 @@ function deleteBeat() {
 </script>
 
 <template lang="pug">
-div.icon-container(@click="deleteBeat")
+div.icon-container(@click.stop="deleteBeat")
   span.material-icons close
 </template>
 

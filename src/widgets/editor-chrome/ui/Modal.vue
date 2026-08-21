@@ -21,10 +21,12 @@ const closeModal = (isNavigation = false) => {
 };
 
 const handleKeydown = (e) => {
+  if (!props.isVisible) return;
   if (e.key === "Escape") closeModal();
 };
 
 const handlePopState = () => {
+  if (!props.isVisible) return;
   closeModal(true);
 };
 
