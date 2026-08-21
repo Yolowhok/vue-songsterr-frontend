@@ -125,12 +125,14 @@ const handleClickOutside = (event) => {
   display: flex;
   flex-direction: column;
   justify-content: 0;
+  overflow: visible;
 }
 .annotation {
   height: 30%;
   display: flex;
   flex-direction: column-reverse;
   justify-content: flex-start;
+  overflow: visible;
 }
 .duration {
   height: 30%;
@@ -164,12 +166,14 @@ const handleClickOutside = (event) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
 }
 .value {
   position: absolute;
   height: 80%;
   width: 100%;
   z-index: 1;
+  overflow: visible;
 }
 .lines-content {
   height: 80%;

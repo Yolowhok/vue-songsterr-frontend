@@ -28,6 +28,7 @@ div.bar-list-root
   position: relative;
   width: 100%;
   min-height: 50vh;
+  overflow: visible;
 }
 .flex-container {
   align-items: center;
@@ -36,6 +37,7 @@ div.bar-list-root
   padding-right: 100px;
   display: flex;
   justify-content: flex-start;
+  overflow: visible;
 }
 
 .forBar {

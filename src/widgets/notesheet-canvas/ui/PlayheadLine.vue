@@ -43,56 +43,78 @@ function findBeatAt(clientX, clientY) {
       };
     }
     const midX = (r.left + r.right) / 2;
-    const dist = Math.abs(clientX - midX) + Math.abs(clientY - (r.top + r.height / 2)) * 0.25;
+    const dist =
+      Math.abs(clientX - midX) +
+      Math.abs(clientY - (r.top + r.height / 2)) * 0.25;
     if (dist < nearestDist) {
       nearestDist = dist;
-      const progress = r.width > 0 ? clamp((clientX - r.left) / r.width, 0, 1) : 0;
+      const progress =
+        r.width > 0 ? clamp((clientX - r.left) / r.width, 0, 1) : 0;
       nearest = { barOrder, beatOrder, progress };
     }
   }
   return nearest;
 }
 
-function updatePosition() {
+const HEAD = 36;
+const ROW_JUMP_Y = 80;
+const BACK_JUMP_X = 120;
+/** Exponential follow: base rate + gain * |error|; soft max speed */
+const FOLLOW_BASE = 6.5;
+const FOLLOW_GAIN = 0.012;
+const FOLLOW_MAX_SPEED = 2200;
+
+let lastBarOrder = null;
+let lastDocY = null;
+let lastDocX = null;
+/** Line position while crossing gutter (doc coords). Null = stick to live beat. */
+let gutterLine = null;
+let lastTickTs = null;
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function playheadTarget() {
   const ph = store.playhead;
   const root = rootRef.value?.parentElement;
-  if (!ph || !root) {
-    style.value = { display: "none" };
-    return;
-  }
+  if (!ph || !root || store.getEditModeStatus) return null;
   const beatEl = document.querySelector(
     `[data-playhead-beat="${ph.barOrder}-${ph.beatOrder}"]`
   );
-  if (!beatEl) {
-    style.value = { display: "none" };
-    return;
-  }
-  const rootRect = root.getBoundingClientRect();
+  if (!beatEl) return null;
   const beatRect = beatEl.getBoundingClientRect();
-  const head = 36;
-  const left =
-    beatRect.left -
-    rootRect.left +
-    root.scrollLeft +
-    ph.progress * beatRect.width;
-  const top = beatRect.top - rootRect.top + root.scrollTop - head;
-  style.value = {
-    display: "block",
-    left: `${left}px`,
-    top: `${top}px`,
-    height: `${Math.max(beatRect.height, 120) + head}px`,
+  const docX =
+    beatRect.left + window.scrollX + ph.progress * beatRect.width;
+  const docY = beatRect.top + window.scrollY;
+  return {
+    ph,
+    root,
+    beatEl,
+    beatRect,
+    docX,
+    docY,
+    height: Math.max(beatRect.height, 120) + HEAD,
+    barOrder: ph.barOrder,
+    beatOrder: ph.beatOrder,
   };
 }
 
-function followPlayhead() {
-  const ph = store.playhead;
-  if (!ph || dragging.value) return;
-  const beatEl = document.querySelector(
-    `[data-playhead-beat="${ph.barOrder}-${ph.beatOrder}"]`
-  );
-  if (!beatEl) return;
-  const beatRect = beatEl.getBoundingClientRect();
-  const x = beatRect.left + ph.progress * beatRect.width;
+function applyStyle(docX, docY, height, root) {
+  const rootRect = root.getBoundingClientRect();
+  const rootDocX = rootRect.left + window.scrollX;
+  const rootDocY = rootRect.top + window.scrollY;
+  style.value = {
+    display: "block",
+    left: `${docX - rootDocX + root.scrollLeft}px`,
+    top: `${docY - rootDocY + root.scrollTop - HEAD}px`,
+    height: `${height}px`,
+  };
+}
+
+/** Delta to move scroll so playhead sits at lock-point. */
+function cameraDeltaFor(t) {
+  const x = t.beatRect.left + t.ph.progress * t.beatRect.width;
   const headerH = headerHeight();
   const followX = window.innerWidth * 0.36;
   const leftMargin = Math.max(72, window.innerWidth * 0.1);
@@ -107,21 +129,135 @@ function followPlayhead() {
       dx = x - (window.innerWidth - rightMargin);
     }
   }
-
   const viewTop = headerH;
   const viewBottom = window.innerHeight - headerH;
   let dy = 0;
-  if (beatRect.bottom > viewBottom - 48) {
-    dy = beatRect.bottom - (viewBottom - 48);
-  } else if (beatRect.top < viewTop + 48) {
-    dy = beatRect.top - (viewTop + 48);
+  if (t.beatRect.bottom > viewBottom - 48) {
+    dy = t.beatRect.bottom - (viewBottom - 48);
+  } else if (t.beatRect.top < viewTop + 48) {
+    dy = t.beatRect.top - (viewTop + 48);
   }
-  if (dx || dy) {
-    window.scrollBy(dx, dy);
+  return { dx, dy };
+}
+
+/**
+ * Continuous exponential camera follow: speed grows with lag.
+ * No discrete pans / full-error scrollBy.
+ */
+function followCamera(dtSec) {
+  if (!store.isPlaying || store.getEditModeStatus || dragging.value) {
+    return;
   }
+  const t = playheadTarget();
+  if (!t) return;
+  const { dx, dy } = cameraDeltaFor(t);
+  const errMag = Math.hypot(dx, dy);
+  if (errMag < 0.35) return;
+
+  const dt = clamp(dtSec, 0.001, 0.05);
+  const lambda = FOLLOW_BASE + FOLLOW_GAIN * errMag;
+  let alpha = 1 - Math.exp(-lambda * dt);
+  // Soft max speed so row jumps don't teleport
+  const maxStep = FOLLOW_MAX_SPEED * dt;
+  let stepX = dx * alpha;
+  let stepY = dy * alpha;
+  const stepMag = Math.hypot(stepX, stepY);
+  if (stepMag > maxStep && stepMag > 0) {
+    const s = maxStep / stepMag;
+    stepX *= s;
+    stepY *= s;
+  }
+  window.scrollTo(
+    Math.max(0, window.scrollX + stepX),
+    Math.max(0, window.scrollY + stepY)
+  );
+}
+
+function beginGutterLine(fromDoc, to) {
+  const dist = Math.hypot(to.docX - fromDoc.x, to.docY - fromDoc.y);
+  gutterLine = {
+    t0: performance.now(),
+    dur: clamp(dist * 0.4, 120, 180),
+    fromX: fromDoc.x,
+    fromY: fromDoc.y,
+    toX: to.docX,
+    toY: to.docY,
+    height: to.height,
+    root: to.root,
+  };
+}
+
+function stepGutterLine(now) {
+  if (!gutterLine) return false;
+  const u = Math.min(1, (now - gutterLine.t0) / gutterLine.dur);
+  const e = easeOutCubic(u);
+  const docX = gutterLine.fromX + (gutterLine.toX - gutterLine.fromX) * e;
+  const docY = gutterLine.fromY + (gutterLine.toY - gutterLine.fromY) * e;
+  applyStyle(docX, docY, gutterLine.height, gutterLine.root);
+  lastDocX = docX;
+  lastDocY = docY;
+  if (u >= 1) gutterLine = null;
+  return true;
+}
+
+function isNewRow(prevX, prevY, t) {
+  if (prevY == null) return false;
+  if (Math.abs(t.docY - prevY) > ROW_JUMP_Y) return true;
+  if (prevX != null && t.docX < prevX - BACK_JUMP_X) return true;
+  return false;
+}
+
+function updatePosition() {
+  const t = playheadTarget();
+  if (!t) {
+    style.value = { display: "none" };
+    lastBarOrder = null;
+    lastDocX = null;
+    lastDocY = null;
+    gutterLine = null;
+    return;
+  }
+
+  if (gutterLine) {
+    applyStyle(
+      lastDocX ?? t.docX,
+      lastDocY ?? t.docY,
+      t.height,
+      t.root
+    );
+    return;
+  }
+
+  const barChanged = lastBarOrder != null && t.barOrder !== lastBarOrder;
+  if (store.isPlaying && !dragging.value && barChanged) {
+    if (isNewRow(lastDocX, lastDocY, t)) {
+      // Snap line to new row; camera catches up via followCamera lag
+      applyStyle(t.docX, t.docY, t.height, t.root);
+      lastBarOrder = t.barOrder;
+      lastDocX = t.docX;
+      lastDocY = t.docY;
+      return;
+    }
+    beginGutterLine(
+      { x: lastDocX ?? t.docX, y: lastDocY ?? t.docY },
+      t
+    );
+    lastBarOrder = t.barOrder;
+    return;
+  }
+
+  applyStyle(t.docX, t.docY, t.height, t.root);
+  lastBarOrder = t.barOrder;
+  lastDocX = t.docX;
+  lastDocY = t.docY;
 }
 
 function seekAt(clientX, clientY) {
+  if (store.getEditModeStatus) return;
+  gutterLine = null;
+  lastBarOrder = null;
+  lastDocX = null;
+  lastDocY = null;
   const hit = findBeatAt(clientX, clientY);
   if (!hit) return;
   store.seekPlayback(hit.barOrder, hit.beatOrder, hit.progress);
@@ -156,6 +292,7 @@ function onPointerUp() {
 }
 
 function onHandlePointerDown(event) {
+  if (store.getEditModeStatus) return;
   event.preventDefault();
   event.stopPropagation();
   dragging.value = true;
@@ -167,21 +304,52 @@ function onHandlePointerDown(event) {
 }
 
 let raf = null;
-function tick() {
+function tick(now) {
+  const n = now || performance.now();
+  const dtSec =
+    lastTickTs == null ? 1 / 60 : (n - lastTickTs) / 1000;
+  lastTickTs = n;
+
   if (store.isPlaying || store.playhead || dragging.value) {
-    updatePosition();
-    if (store.isPlaying) followPlayhead();
+    if (gutterLine) {
+      stepGutterLine(n);
+      const t = playheadTarget();
+      if (t && gutterLine) {
+        gutterLine.toX = t.docX;
+        gutterLine.toY = t.docY;
+        gutterLine.height = t.height;
+        gutterLine.root = t.root;
+      }
+    } else {
+      updatePosition();
+    }
+    // Camera always follows continuously while playing (even during gutter)
+    if (store.isPlaying && !dragging.value) {
+      followCamera(dtSec);
+      // Re-stick line after scroll so it stays on beat
+      if (!gutterLine) updatePosition();
+      else {
+        const t = playheadTarget();
+        if (t) {
+          applyStyle(
+            lastDocX ?? t.docX,
+            lastDocY ?? t.docY,
+            t.height,
+            t.root
+          );
+        }
+      }
+    }
+  } else {
+    lastTickTs = null;
   }
   raf = requestAnimationFrame(tick);
 }
 
 watch(
-  () => [store.playhead, store.isPlaying],
+  () => [store.playhead, store.isPlaying, store.getEditModeStatus],
   () => {
-    updatePosition();
-    if (!store.isPlaying && store.playhead && !dragging.value) {
-      followPlayhead();
-    }
+    if (!gutterLine) updatePosition();
   },
   { deep: true }
 );
@@ -233,6 +401,7 @@ div.playhead-root(ref="rootRef")
   background: rgb(131, 38, 251);
   box-shadow: 0 0 4px rgba(131, 38, 251, 0.45);
   pointer-events: none;
+  will-change: left, top;
 }
 .playhead-line.dragging {
   background: rgb(111, 0, 255);

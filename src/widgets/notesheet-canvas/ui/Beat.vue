@@ -42,18 +42,31 @@ const buttonRef = ref(null);
 
 const closeAllPanels = () => {
   showPanel.value = false;
-  showDeleteIcon.value = false;
-  isHovered.value = false;
 };
+
+function openPanelFromKeyboard(payload) {
+  if (
+    payload?.barOrder !== props.orderIndex ||
+    payload?.beatOrder !== props.beatOrderIndex
+  ) {
+    return;
+  }
+  eventBus.emit("close-all-beat-panels");
+  eventBus.emit("close-bar-panels");
+  eventBus.emit("close-bar-size-panel");
+  showPanel.value = true;
+}
 
 onMounted(() => {
   eventBus.on("close-all-beat-panels", closeAllPanels);
+  eventBus.on("open-beat-panel", openPanelFromKeyboard);
   document.addEventListener("click", handleClickOutside);
   updateSvgComponent();
 });
 
 onUnmounted(() => {
   eventBus.off("close-all-beat-panels", closeAllPanels);
+  eventBus.off("open-beat-panel", openPanelFromKeyboard);
   document.removeEventListener("click", handleClickOutside);
 });
 
@@ -82,9 +95,10 @@ function togglePanel(event) {
 }
 
 function onBeatSeek(event) {
+  if (store.getEditModeStatus) return;
   if (
     event.target.closest?.(
-      ".delete-beat, .add-button, .popup-panel, .overlay-input, .playhead-line"
+      ".delete-beat, .add-button, .popup-panel, .beat-popup-panel, .overlay-input, .playhead-line"
     )
   ) {
     return;
@@ -114,6 +128,7 @@ const svgProps = computed(() => {
 const currentDuration = computed(() => props.beat?.duration?.name);
 
 const isPlayheadBeat = computed(() => {
+  if (store.getEditModeStatus) return false;
   const ph = store.playhead;
   return (
     !!ph &&
@@ -154,6 +169,15 @@ const tupletRunLength = computed(() => {
     else break;
   }
   return Math.max(1, n);
+});
+
+/** Bracket spans centers of first…last digit (beat = 90px, digit center = 45px). */
+const tupletBracketStyle = computed(() => {
+  const n = tupletRunLength.value;
+  if (n <= 1) {
+    return { left: "35px", width: "20px" };
+  }
+  return { left: "45px", width: `${(n - 1) * 90}px` };
 });
 
 function updateSvgComponent() {
@@ -215,7 +239,7 @@ div.beat-wrapper(
     DeleteBeat.delete-beat(v-if="showDeleteIcon && store.getEditModeStatus" :barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
   div.tuplet-bracket(
     v-if="tupletBracketStart"
-    :style="{ width: `calc(${tupletRunLength} * 90px - 20px)` }"
+    :style="tupletBracketStyle"
   )
     span.tuplet-num 3
   div.beat
@@ -230,7 +254,7 @@ div.beat-wrapper(
     div.rest-mark(v-else) 𝄽
   div
     TrashIcon.add-button.logo(ref="buttonRef" @click="togglePanel" v-if="isHovered && store.getEditModeStatus" viewBox="0 0 24 24" width="24" height="24")
-    div.popup-panel(v-if="showPanel" ref="panelRef")
+    div.popup-panel.beat-popup-panel(v-if="showPanel" ref="panelRef")
       BeatPanel(:barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
   component.eigth-svg(v-if="SvgComponent && !isRest" :is="SvgComponent" :points="svgProps")
   span.dotted-dot(v-if="isDotted && !isRest" aria-hidden="true")
@@ -341,7 +365,6 @@ div.beat-wrapper(
 .tuplet-bracket {
   position: absolute;
   top: -18px;
-  left: 40px;
   height: 14px;
   border-top: 2px solid #333;
   border-left: 2px solid #333;

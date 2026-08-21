@@ -33,7 +33,13 @@ const number = ref();
 const editing = ref(false);
 const inputValue = ref(number.value);
 const wrapperRef = ref(null);
+const cellRef = ref(null);
 const inputRef = ref(null);
+
+/** H/P/slide: gap from previous cell → this cell (local to this cell). */
+const techniqueBridge = ref(null);
+/** Tie: gap from this cell → next same-fret cell (local to this cell). */
+const tieBridge = ref(null);
 
 const isSelected = computed(() => {
   const c = store.cursor;
@@ -68,6 +74,139 @@ const techniqueMark = computed(() => {
       return "";
   }
 });
+const needsTechniqueBridge = computed(
+  () => Boolean(techniqueMark.value && technique.value !== "bend")
+);
+
+function flattenBeats() {
+  const ns = store.getComposition?.notesheets?.[store.getChosenNotesheet];
+  if (!ns?.bars?.length) return [];
+  const bars = [...ns.bars].sort((a, b) => a.orderIndex - b.orderIndex);
+  const flat = [];
+  for (const bar of bars) {
+    const beats = [...(bar.beats || [])].sort(
+      (a, b) => a.orderIndex - b.orderIndex
+    );
+    for (const beat of beats) {
+      flat.push({ barOrder: bar.orderIndex, beatOrder: beat.orderIndex, beat });
+    }
+  }
+  return flat;
+}
+
+/** direction: -1 previous note on this string, +1 next. */
+function findNeighborNote(direction) {
+  const flat = flattenBeats();
+  const idx = flat.findIndex(
+    (x) =>
+      x.barOrder === props.orderIndex && x.beatOrder === props.beatOrderIndex
+  );
+  if (idx < 0) return null;
+  const end = direction < 0 ? -1 : flat.length;
+  for (let i = idx + direction; i !== end; i += direction) {
+    const hit = flat[i].beat?.beatNotes?.find(
+      (bn) => bn?.position?.string === props.numberString
+    );
+    if (hit) {
+      return {
+        barOrder: flat[i].barOrder,
+        beatOrder: flat[i].beatOrder,
+        string: props.numberString,
+        note: hit,
+      };
+    }
+  }
+  return null;
+}
+
+const neighborPrev = computed(() => findNeighborNote(-1));
+const neighborNext = computed(() => findNeighborNote(1));
+
+const sameFretAs = (other) =>
+  other?.position?.fret != null &&
+  note.value?.position?.fret != null &&
+  other.position.fret === note.value.position.fret;
+
+/** Previous note is tied into this one (same string + same fret). */
+const isTieContinuation = computed(() => {
+  const prev = neighborPrev.value?.note;
+  return Boolean(prev?.tied && sameFretAs(prev));
+});
+
+/** Draw a rightward arc only if the next note is the same pitch. */
+const canDrawTie = computed(() => {
+  if (!isTied.value) return false;
+  return sameFretAs(neighborNext.value?.note);
+});
+
+const fretLabel = computed(() => {
+  const fret = note.value?.position?.fret;
+  if (fret == null || fret === "") return "";
+  return isTieContinuation.value ? `(${fret})` : String(fret);
+});
+
+const fretFontSize = computed(() => {
+  if (!isTieContinuation.value) return "90px";
+  const fret = String(note.value?.position?.fret ?? "");
+  return fret.length > 1 ? "48px" : "58px";
+});
+
+function gapGeometry(fromRect, toRect, originRect) {
+  const left = fromRect.right - originRect.left;
+  const width = Math.max(16, toRect.left - fromRect.right);
+  // Filled ribbon: mild taper at tips, modest arch, thin mid body.
+  const pad = 2;
+  const tipY = 17;
+  const endHalf = 0.95;
+  const outerPeak = 0.8;
+  const innerPeak = 4.6;
+  const cx = width / 2;
+  return {
+    left,
+    width,
+    path: [
+      `M ${pad} ${tipY - endHalf}`,
+      `Q ${cx} ${outerPeak} ${width - pad} ${tipY - endHalf}`,
+      `L ${width - pad} ${tipY + endHalf}`,
+      `Q ${cx} ${innerPeak} ${pad} ${tipY + endHalf}`,
+      "Z",
+    ].join(" "),
+  };
+}
+
+function updateBridge() {
+  techniqueBridge.value = null;
+  tieBridge.value = null;
+  if (!cellRef.value) return;
+  const cr = cellRef.value.getBoundingClientRect();
+  if (cr.width <= 0) return;
+
+  if (needsTechniqueBridge.value && neighborPrev.value) {
+    const prev = neighborPrev.value;
+    const prevEl = document.querySelector(
+      `[data-tab-cell="${prev.barOrder}-${prev.beatOrder}-${prev.string}"]`
+    );
+    if (prevEl) {
+      const pr = prevEl.getBoundingClientRect();
+      if (pr.width > 0) {
+        techniqueBridge.value = gapGeometry(pr, cr, cr);
+      }
+    }
+  }
+
+  if (canDrawTie.value && neighborNext.value) {
+    const next = neighborNext.value;
+    const nextEl = document.querySelector(
+      `[data-tab-cell="${next.barOrder}-${next.beatOrder}-${next.string}"]`
+    );
+    if (nextEl) {
+      const nr = nextEl.getBoundingClientRect();
+      if (nr.width > 0) {
+        tieBridge.value = gapGeometry(cr, nr, cr);
+      }
+    }
+  }
+}
 
 function selectCell() {
   if (!store.getEditModeStatus) return;
@@ -78,17 +217,12 @@ function selectCell() {
   });
 }
 
-function onCellClick() {
+function onCellClick(event) {
   if (!store.getEditModeStatus) return;
-  const already =
-    store.cursor &&
-    store.cursor.barOrder === props.orderIndex &&
-    store.cursor.beatOrder === props.beatOrderIndex &&
-    store.cursor.string === props.numberString;
+  // Only stop in edit mode so non-edit clicks bubble to onBeatSeek (mid-beat seek).
+  event.stopPropagation();
   selectCell();
-  if (already) {
-    startEdit();
-  }
+  startEdit();
 }
 
 function startEdit() {
@@ -103,8 +237,17 @@ function startEdit() {
     }
   });
 }
-function save() {
-  const val = String(inputValue.value).trim();
+function save(opts = {}) {
+  const keepEditing = Boolean(opts.keepEditing);
+  const val = String(inputValue.value ?? "").trim();
+  const fretNum = val === "" ? NaN : Number(val);
+  const validFret = val === "" || (!Number.isNaN(fretNum) && fretNum >= 0 && fretNum <= 24);
+
+  if (!validFret) {
+    if (!keepEditing) editing.value = false;
+    return;
+  }
+
   if (props.notevaluef != null) {
     if (val === "") {
       store.deleteNote(
@@ -113,39 +256,46 @@ function save() {
         props.notevaluef
       );
     } else {
-      const newValue = JSON.parse(
-        JSON.stringify(
-          store.getFretboard[Number(props.numberString)][Number(val)]
-        )
-      );
+      const board = store.getFretboard?.[Number(props.numberString)];
+      const cell = board?.[Number(val)];
+      if (!cell) {
+        if (!keepEditing) editing.value = false;
+        return;
+      }
+      const newValue = JSON.parse(JSON.stringify(cell));
       store.updateNoteValue(props.orderIndex, props.beatOrderIndex, newValue);
     }
-  } else if (val != "undefined") {
-    const newValue = JSON.parse(
-      JSON.stringify(store.fretboard[Number(props.numberString)][Number(val)])
-    );
+  } else if (val !== "") {
+    const board = store.fretboard?.[Number(props.numberString)];
+    const cell = board?.[Number(val)];
+    if (!cell) {
+      if (!keepEditing) editing.value = false;
+      return;
+    }
+    const newValue = JSON.parse(JSON.stringify(cell));
     store.addNote(props.orderIndex, props.beatOrderIndex, newValue);
   }
 
-  if (!isNaN(parseInt(val))) {
+  if (!isNaN(parseInt(val, 10))) {
     number.value = val;
   }
-  if (val == "") {
+  if (val === "") {
     number.value = "";
   }
-  editing.value = false;
+  if (!keepEditing) {
+    editing.value = false;
+  }
   updated.value = !updated.value;
-}
-function cancel() {
-  editing.value = false;
 }
 function onKeydown(event) {
   if (event.key === "Enter") {
+    // Open beat panel via window hotkey — do not stopPropagation.
     event.preventDefault();
-    save();
   } else if (event.key === "Escape") {
     event.preventDefault();
-    cancel();
+    // Beat panel owns Esc while open (capture handler closes it).
+    if (document.querySelector(".beat-popup-panel")) return;
+    store.clearCursor();
   } else if (
     event.key === "ArrowLeft" ||
     event.key === "ArrowRight" ||
@@ -154,7 +304,7 @@ function onKeydown(event) {
   ) {
     event.preventDefault();
     event.stopPropagation();
-    cancel();
+    save();
     selectCell();
     if (event.shiftKey && event.key === "ArrowRight") {
       store.insertBarRightAtCursor();
@@ -174,15 +324,16 @@ function onKeydown(event) {
 function onInput(event) {
   let val = event.target.value;
 
-  val = val.replace(/[^\d ]/g, "");
+  val = val.replace(/[^\d]/g, "");
 
-  if (Number(val) <= 24) {
+  if (val === "" || Number(val) <= 24) {
     event.target.value = val;
     inputValue.value = val;
   } else {
     event.target.value = val.slice(-1);
     inputValue.value = event.target.value;
   }
+  save({ keepEditing: true });
 }
 function onClickOutside(event) {
   if (!wrapperRef.value) return;
@@ -192,29 +343,56 @@ function onClickOutside(event) {
 }
 
 watch(isSelected, (selected) => {
-  if (!selected && editing.value) {
-    cancel();
+  if (selected) {
+    startEdit();
+  } else if (editing.value) {
+    save();
   }
 });
 
+watch(
+  [
+    isTied,
+    canDrawTie,
+    needsTechniqueBridge,
+    neighborPrev,
+    neighborNext,
+    () => props.notevaluef,
+    () => props.orderIndex,
+    () => props.beatOrderIndex,
+  ],
+  () => {
+    nextTick(() => {
+      updateBridge();
+      nextTick(updateBridge);
+    });
+  }
+);
+
 onMounted(() => {
   document.addEventListener("click", onClickOutside);
+  window.addEventListener("resize", updateBridge);
+  window.addEventListener("scroll", updateBridge, true);
+  nextTick(updateBridge);
 });
 
 onUnmounted(() => {
   document.removeEventListener("click", onClickOutside);
+  window.removeEventListener("resize", updateBridge);
+  window.removeEventListener("scroll", updateBridge, true);
 });
 </script>
 
 <template lang="pug">
     div(
+      ref="cellRef"
       :data-tab-cell="`${props.orderIndex}-${props.beatOrderIndex}-${props.numberString}`"
       class="tab-cell"
     )
         div.svg-content(
           @click="onCellClick"
           ref="wrapperRef"
-          :class="{ 'active': store.getEditModeStatus, 'cursor-selected': isSelected, 'tied-note': isTied }"
+          :class="{ 'active': store.getEditModeStatus, 'cursor-selected': isSelected }"
         )
             div.svg-wrapper.svg-wrapper(
               :class="{ 'active': store.getEditModeStatus, 'cursor-selected': isSelected }"
@@ -224,12 +402,11 @@ onUnmounted(() => {
                       text(
                         x="50%"
                         y="50%"
-                        font-size="90px"
+                        :font-size="fretFontSize"
                         dominant-baseline="middle"
                         text-anchor="middle"
                         dy="0.1em"
-                        :opacity="isTied ? 0.45 : 1"
-                        ) {{ props?.notevaluef?.position?.fret }}
+                        ) {{ fretLabel }}
                 input(
                 v-if="editing && store.getEditModeStatus"
 
@@ -240,20 +417,24 @@ onUnmounted(() => {
                 @keydown="onKeydown"
                 @input="onInput"
                 )
-            svg.tie-arc(
-              v-if="isTied"
-              viewBox="0 0 40 16"
+            span.technique-mark.between(
+              v-if="techniqueMark && technique !== 'bend' && techniqueBridge"
+              :style="{ left: techniqueBridge.left + techniqueBridge.width / 2 + 'px' }"
+              aria-hidden="true"
+            ) {{ techniqueMark }}
+            span.technique-mark.local(
+              v-else-if="techniqueMark"
               aria-hidden="true"
             )
-              path(
-                d="M 2 12 Q 20 0 38 12"
-                fill="none"
-                stroke="rgb(131, 38, 251)"
-                stroke-width="2"
-              )
-            span.technique-mark(v-if="techniqueMark" aria-hidden="true")
               | {{ techniqueMark }}
               span.bend-val(v-if="bendLabel") {{ bendLabel }}
+        svg.tie-arc(
+          v-if="tieBridge"
+          :style="{ left: tieBridge.left + 'px', width: tieBridge.width + 'px' }"
+          :viewBox="`0 0 ${tieBridge.width} 20`"
+          aria-hidden="true"
+        )
+          path(:d="tieBridge.path" fill="#111")
 </template>
 
 <style scoped>
@@ -297,6 +478,7 @@ input[type="number"] {
   z-index: 200;
 }
 .svg-content.cursor-selected rect {
+  fill: rgb(111, 0, 255);
   fill-opacity: 1;
 }
 .svg-wrapper {
@@ -312,7 +494,7 @@ input[type="number"] {
 }
 .svg-wrapper.cursor-selected {
   border-radius: 25%;
-  outline: solid 2px #4c73fe;
+  outline: solid 2px rgb(131, 38, 251);
   transform: scale(1.08);
 }
 .svg-wrapper svg {
@@ -348,22 +530,20 @@ input[type="number"] {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: visible;
 }
 .tie-arc {
   position: absolute;
-  left: -28px;
-  top: 40%;
-  width: 36px;
-  height: 14px;
+  top: -12px;
+  height: 20px;
   pointer-events: none;
   z-index: 210;
   overflow: visible;
+  shape-rendering: geometricPrecision;
 }
 .technique-mark {
   position: absolute;
-  left: -14px;
-  top: 8%;
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 700;
   color: rgb(131, 38, 251);
   pointer-events: none;
@@ -371,8 +551,17 @@ input[type="number"] {
   line-height: 1;
   white-space: nowrap;
 }
+.technique-mark.between {
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.technique-mark.local {
+  left: 72%;
+  top: 50%;
+  transform: translateY(-50%);
+}
 .bend-val {
-  font-size: 9px;
-  margin-left: 1px;
+  font-size: 11px;
+  margin-left: 2px;
 }
 </style>

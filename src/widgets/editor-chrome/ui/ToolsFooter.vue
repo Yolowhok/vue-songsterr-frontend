@@ -184,13 +184,13 @@ async function deleteComposition() {
               div.flex
                 button.action-btn(@click="store.togglePlayback()")
                   div.link.default
-                    i.material-symbols-outlined {{ store.isPlaying ? 'pause' : 'play_arrow' }}
+                    i.material-symbols-outlined.playback-icon {{ store.isPlaying ? 'pause' : 'play_arrow' }}
                     span.link-text {{ store.isPlaying ? 'ПАУЗА' : 'PLAY' }}
             li(v-if="store.isPlaying || store.playhead")
               div.flex
                 button.action-btn(@click="store.stopPlayback()")
                   div.link.default
-                    i.material-symbols-outlined stop
+                    i.material-symbols-outlined.playback-icon stop
                     span.link-text СТОП
             li(v-if="store.getEditModeStatus")
               div.flex
@@ -271,10 +271,30 @@ async function deleteComposition() {
 .save-status.error {
   color: #c62828;
 }
+.link {
+  cursor: pointer;
+  font-weight: 500;
+  color: #6f6f6f;
+  font-size: clamp(14px, calc(0.5vw + 0.5vh), 50px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
   color: rgb(186, 58, 58) 0;
   font-size: clamp(25px, calc(1vw + 1.5vh), 50px);
+  line-height: 1;
+  display: block;
+  text-align: center;
+}
+/* Same layout box as other icons; scale only the glyph so labels stay aligned */
+.playback-icon {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+  transform: scale(1.28);
+  transform-origin: center center;
 }
 .action-btn {
   background-color: rgba(0, 0, 0, 0);
@@ -298,33 +318,12 @@ span {
   transform: none !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
-.header {
-  background-color: #ffffff;
-  color: rgb(0, 0, 0);
-  font-family: "Roboto", sans-serif;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
 .container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   max-width: 75%;
-  justify-content: center;
   margin: 0 auto;
-}
-.link {
-  cursor: pointer;
-  font-weight: 500;
-  color: #6f6f6f;
-  font-size: clamp(14px, calc(0.5vw + 0.5vh), 50px);
-  display: flex;
-  flex-direction: column;
 }
 .logo img {
   height: 50px;

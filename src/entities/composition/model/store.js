@@ -268,6 +268,7 @@ export const useCompositionStore = defineStore("composition", {
           if (!serverBeat) continue;
           if (serverBeat.id != null) localBeat.id = serverBeat.id;
           if (serverBeat.duration) localBeat.duration = serverBeat.duration;
+          this._mergeBeatRhythmFields(localBeat, serverBeat);
 
           const localNotes = localBeat.beatNotes || [];
           const serverNotes = serverBeat.beatNotes || [];
@@ -276,9 +277,41 @@ export const useCompositionStore = defineStore("composition", {
               (n) =>
                 n?.position?.string === localNote?.position?.string
             );
-            if (serverNote?.id != null) localNote.id = serverNote.id;
+            if (!serverNote) continue;
+            if (serverNote.id != null) localNote.id = serverNote.id;
+            this._mergeBeatNoteArticulation(localNote, serverNote);
           }
         }
+      }
+    },
+    /** Only overwrite when the server JSON actually includes the key. */
+    _mergeBeatRhythmFields(localBeat, serverBeat) {
+      if (!localBeat || !serverBeat) return;
+      if ("dotted" in serverBeat && serverBeat.dotted != null) {
+        localBeat.dotted = serverBeat.dotted;
+      }
+      if ("rest" in serverBeat && serverBeat.rest != null) {
+        localBeat.rest = serverBeat.rest;
+      }
+      if ("tupletNum" in serverBeat) {
+        localBeat.tupletNum =
+          serverBeat.tupletNum != null ? serverBeat.tupletNum : null;
+      }
+      if ("tupletDen" in serverBeat) {
+        localBeat.tupletDen =
+          serverBeat.tupletDen != null ? serverBeat.tupletDen : null;
+      }
+    },
+    _mergeBeatNoteArticulation(localNote, serverNote) {
+      if (!localNote || !serverNote) return;
+      if ("tied" in serverNote && serverNote.tied != null) {
+        localNote.tied = serverNote.tied;
+      }
+      if ("technique" in serverNote) {
+        localNote.technique = serverNote.technique ?? null;
+      }
+      if ("bendValue" in serverNote) {
+        localNote.bendValue = serverNote.bendValue ?? null;
       }
     },
     _pointContext() {
@@ -327,10 +360,7 @@ export const useCompositionStore = defineStore("composition", {
         if (!existing) return serverBeat;
         if (serverBeat.id != null) existing.id = serverBeat.id;
         if (serverBeat.duration) existing.duration = serverBeat.duration;
-        if (serverBeat.dotted != null) existing.dotted = serverBeat.dotted;
-        if (serverBeat.rest != null) existing.rest = serverBeat.rest;
-        existing.tupletNum = serverBeat.tupletNum ?? null;
-        existing.tupletDen = serverBeat.tupletDen ?? null;
+        this._mergeBeatRhythmFields(existing, serverBeat);
         const serverNotes = serverBeat.beatNotes || [];
         existing.beatNotes = serverNotes.map((serverNote) => {
           const existingNote = (existing.beatNotes || []).find(
@@ -340,26 +370,42 @@ export const useCompositionStore = defineStore("composition", {
           if (serverNote.id != null) existingNote.id = serverNote.id;
           if (serverNote.noteOctave) existingNote.noteOctave = serverNote.noteOctave;
           if (serverNote.position) existingNote.position = serverNote.position;
-          if (serverNote.tied != null) existingNote.tied = serverNote.tied;
-          existingNote.technique = serverNote.technique ?? null;
-          existingNote.bendValue = serverNote.bendValue ?? null;
+          this._mergeBeatNoteArticulation(existingNote, serverNote);
           return existingNote;
         });
         return existing;
       });
     },
-    async _syncPointOrRollback(request) {
+    /**
+     * @param {Promise} request
+     * @param {{ soft?: boolean }} [opts] soft=true: discard history snapshot and
+     *   revert only via undo stack pop+apply still needed for optimistic UI,
+     *   but skip markDirty after undo to avoid save thrash.
+     */
+    async _syncPointOrRollback(request, opts = {}) {
       try {
         const response = await request;
         if (response?.data) {
           this._reconcileNotesheet(response.data);
         }
         this.lastSavedAt = Date.now();
+        this.saveError = null;
         return true;
       } catch (e) {
         console.error("Point API failed, rolling back", e);
         this.saveError = e?.message || "Point edit failed";
-        this.undo();
+        if (opts.soft) {
+          // Revert optimistic local change without pushing redo / dirty loop
+          if (this.undoStack.length) {
+            const previous = this.undoStack.pop();
+            this._historySuspended = true;
+            this.getComposition.notesheets[this.chosenNotesheet] = previous;
+            this.checkAllDurations();
+            this._historySuspended = false;
+          }
+        } else {
+          this.undo();
+        }
         return false;
       }
     },
@@ -482,7 +528,7 @@ export const useCompositionStore = defineStore("composition", {
      */
     moveCursor(dx, dy) {
       if (!this.editModeStatus) return;
-      const cursor = this.ensureCursor();
+      const cursor = this.cursor;
       if (!cursor) return;
 
       if (dy) {
@@ -749,7 +795,7 @@ export const useCompositionStore = defineStore("composition", {
       this.chosenComposition = composition;
       console.log("composition is chosed (only band and title)");
     },
-    async _persistCurrentBeat(barOrderIndex, beatOrderIndex) {
+    async _persistCurrentBeat(barOrderIndex, beatOrderIndex, opts = {}) {
       const ctx = this._pointContext();
       if (!ctx) return;
       const notesheet = this.getComposition?.notesheets?.[this.chosenNotesheet];
@@ -764,7 +810,8 @@ export const useCompositionStore = defineStore("composition", {
           barOrderIndex,
           beatOrderIndex,
           payload
-        )
+        ),
+        opts
       );
     },
     deleteNote(barOrderIndex, beatOrderIndex, noteValue) {
@@ -1437,7 +1484,7 @@ export const useCompositionStore = defineStore("composition", {
       if (!beat) return;
       beat.dotted = !beat.dotted;
       this.markDirty();
-      this._persistCurrentBeat(barOrderIndex, beatOrderIndex);
+      this._persistCurrentBeat(barOrderIndex, beatOrderIndex, { soft: true });
     },
     toggleBeatRest(barOrderIndex, beatOrderIndex) {
       this.pushHistory();
@@ -1445,7 +1492,7 @@ export const useCompositionStore = defineStore("composition", {
       if (!beat) return;
       beat.rest = !beat.rest;
       this.markDirty();
-      this._persistCurrentBeat(barOrderIndex, beatOrderIndex);
+      this._persistCurrentBeat(barOrderIndex, beatOrderIndex, { soft: true });
     },
     toggleBeatTuplet(barOrderIndex, beatOrderIndex) {
       this.pushHistory();
@@ -1459,7 +1506,7 @@ export const useCompositionStore = defineStore("composition", {
         beat.tupletDen = 2;
       }
       this.markDirty();
-      this._persistCurrentBeat(barOrderIndex, beatOrderIndex);
+      this._persistCurrentBeat(barOrderIndex, beatOrderIndex, { soft: true });
     },
     toggleNoteTiedAtCursor() {
       this.pushHistory();
@@ -1467,7 +1514,9 @@ export const useCompositionStore = defineStore("composition", {
       if (!hit?.note) return;
       hit.note.tied = !hit.note.tied;
       this.markDirty();
-      this._persistCurrentBeat(hit.cursor.barOrder, hit.cursor.beatOrder);
+      this._persistCurrentBeat(hit.cursor.barOrder, hit.cursor.beatOrder, {
+        soft: true,
+      });
     },
     /**
      * @param {string|null} technique hammer|pull|slide_up|slide_down|bend|null
@@ -1486,7 +1535,9 @@ export const useCompositionStore = defineStore("composition", {
           technique === "bend" ? bendValue || "half" : null;
       }
       this.markDirty();
-      this._persistCurrentBeat(hit.cursor.barOrder, hit.cursor.beatOrder);
+      this._persistCurrentBeat(hit.cursor.barOrder, hit.cursor.beatOrder, {
+        soft: true,
+      });
     },
     deleteBeat(barOrderIndex, beatOrderIndex) {
       this.pushHistory();
@@ -1577,9 +1628,7 @@ export const useCompositionStore = defineStore("composition", {
     },
     changeEditModeStatus() {
       this.editModeStatus = !this.editModeStatus;
-      if (this.editModeStatus) {
-        this.ensureCursor();
-      } else {
+      if (!this.editModeStatus) {
         this.clearCursor();
       }
     },

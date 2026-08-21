@@ -53,12 +53,14 @@ onUpdated(() => {});
   align-items: center;
   justify-content: left;
   flex-direction: row;
+  overflow: visible;
 }
 .beat-wrapper {
   position: relative;
   padding: 0;
   margin: 0;
   opacity: 1 !important;
+  overflow: visible;
 }
 .beat-wrapper .overlay {
   position: absolute;

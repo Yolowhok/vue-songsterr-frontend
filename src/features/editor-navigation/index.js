@@ -1,4 +1,5 @@
 import { useCompositionStore } from "@/entities/composition";
+import eventBus from "@/shared/lib/eventBus";
 
 export function useEditorCursor() {
   const store = useCompositionStore();
@@ -15,11 +16,21 @@ export function useEditorCursor() {
   };
 }
 
+function isOverlayInput(event) {
+  const el = event.target;
+  if (!el || typeof el.closest !== "function") return false;
+  return Boolean(
+    el.classList?.contains("overlay-input") || el.closest(".overlay-input")
+  );
+}
+
 function isTypingInField(event) {
   const el = event.target;
   if (!el || typeof el.closest !== "function") return false;
-  // Overlay fret input on a cell: let the input handle digits; arrows handled in NoteV2.
-  if (el.classList?.contains("overlay-input") || el.closest(".overlay-input")) {
+  // Overlay: digits stay in input; Enter/Esc go to window handlers (open/close panel).
+  if (isOverlayInput(event)) {
+    const key = event.key;
+    if (key === "Enter" || key === "Escape") return false;
     return true;
   }
   if (el.closest("[data-tab-cell]")) return false;
@@ -33,8 +44,12 @@ function isRouteModalOpen() {
   return Boolean(document.querySelector(".modal-overlay"));
 }
 
+function isBeatPanelOpen() {
+  return Boolean(document.querySelector(".beat-popup-panel"));
+}
+
 /**
- * Arrow grid + fret digits + Backspace. Call on editor page mount.
+ * Arrow grid + fret digits + Backspace + Enter opens beat panel.
  * @returns {() => void} unbind
  */
 export function bindEditorNavigationHotkeys() {
@@ -44,10 +59,25 @@ export function bindEditorNavigationHotkeys() {
   const onKeyDown = (event) => {
     if (!store.getEditModeStatus) return;
     if (event.metaKey || event.ctrlKey) return;
-    if (isTypingInField(event)) return;
     if (isRouteModalOpen()) return;
 
+    // Beat panel owns arrows / Enter / Esc while open.
+    if (isBeatPanelOpen()) return;
+
+    if (isTypingInField(event)) return;
+
     const key = event.key;
+
+    if (key === "Enter") {
+      event.preventDefault();
+      const cursor = store.ensureCursor();
+      if (!cursor) return;
+      eventBus.emit("open-beat-panel", {
+        barOrder: cursor.barOrder,
+        beatOrder: cursor.beatOrder,
+      });
+      return;
+    }
 
     if (key === "ArrowRight") {
       event.preventDefault();
