@@ -45,6 +45,30 @@ const isSelected = computed(() => {
   );
 });
 
+const note = computed(() => props.notevaluef || null);
+const isTied = computed(() => Boolean(note.value?.tied));
+const technique = computed(() => note.value?.technique || null);
+const bendLabel = computed(() => {
+  if (technique.value !== "bend") return "";
+  return note.value?.bendValue === "full" ? "full" : "½";
+});
+const techniqueMark = computed(() => {
+  switch (technique.value) {
+    case "hammer":
+      return "H";
+    case "pull":
+      return "P";
+    case "slide_up":
+      return "/";
+    case "slide_down":
+      return "\\";
+    case "bend":
+      return "↑";
+    default:
+      return "";
+  }
+});
+
 function selectCell() {
   if (!store.getEditModeStatus) return;
   store.setCursor({
@@ -185,11 +209,12 @@ onUnmounted(() => {
 <template lang="pug">
     div(
       :data-tab-cell="`${props.orderIndex}-${props.beatOrderIndex}-${props.numberString}`"
+      class="tab-cell"
     )
         div.svg-content(
           @click="onCellClick"
           ref="wrapperRef"
-          :class="{ 'active': store.getEditModeStatus, 'cursor-selected': isSelected }"
+          :class="{ 'active': store.getEditModeStatus, 'cursor-selected': isSelected, 'tied-note': isTied }"
         )
             div.svg-wrapper.svg-wrapper(
               :class="{ 'active': store.getEditModeStatus, 'cursor-selected': isSelected }"
@@ -203,6 +228,7 @@ onUnmounted(() => {
                         dominant-baseline="middle"
                         text-anchor="middle"
                         dy="0.1em"
+                        :opacity="isTied ? 0.45 : 1"
                         ) {{ props?.notevaluef?.position?.fret }}
                 input(
                 v-if="editing && store.getEditModeStatus"
@@ -214,6 +240,20 @@ onUnmounted(() => {
                 @keydown="onKeydown"
                 @input="onInput"
                 )
+            svg.tie-arc(
+              v-if="isTied"
+              viewBox="0 0 40 16"
+              aria-hidden="true"
+            )
+              path(
+                d="M 2 12 Q 20 0 38 12"
+                fill="none"
+                stroke="rgb(131, 38, 251)"
+                stroke-width="2"
+              )
+            span.technique-mark(v-if="techniqueMark" aria-hidden="true")
+              | {{ techniqueMark }}
+              span.bend-val(v-if="bendLabel") {{ bendLabel }}
 </template>
 
 <style scoped>
@@ -303,5 +343,36 @@ input[type="number"] {
 .overlay-input::selection {
   background-color: #0000;
   z-index: 200;
+}
+.tab-cell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.tie-arc {
+  position: absolute;
+  left: -28px;
+  top: 40%;
+  width: 36px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 210;
+  overflow: visible;
+}
+.technique-mark {
+  position: absolute;
+  left: -14px;
+  top: 8%;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgb(131, 38, 251);
+  pointer-events: none;
+  z-index: 210;
+  line-height: 1;
+  white-space: nowrap;
+}
+.bend-val {
+  font-size: 9px;
+  margin-left: 1px;
 }
 </style>

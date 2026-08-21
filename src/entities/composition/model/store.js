@@ -327,6 +327,10 @@ export const useCompositionStore = defineStore("composition", {
         if (!existing) return serverBeat;
         if (serverBeat.id != null) existing.id = serverBeat.id;
         if (serverBeat.duration) existing.duration = serverBeat.duration;
+        if (serverBeat.dotted != null) existing.dotted = serverBeat.dotted;
+        if (serverBeat.rest != null) existing.rest = serverBeat.rest;
+        existing.tupletNum = serverBeat.tupletNum ?? null;
+        existing.tupletDen = serverBeat.tupletDen ?? null;
         const serverNotes = serverBeat.beatNotes || [];
         existing.beatNotes = serverNotes.map((serverNote) => {
           const existingNote = (existing.beatNotes || []).find(
@@ -336,6 +340,9 @@ export const useCompositionStore = defineStore("composition", {
           if (serverNote.id != null) existingNote.id = serverNote.id;
           if (serverNote.noteOctave) existingNote.noteOctave = serverNote.noteOctave;
           if (serverNote.position) existingNote.position = serverNote.position;
+          if (serverNote.tied != null) existingNote.tied = serverNote.tied;
+          existingNote.technique = serverNote.technique ?? null;
+          existingNote.bendValue = serverNote.bendValue ?? null;
           return existingNote;
         });
         return existing;
@@ -1407,6 +1414,79 @@ export const useCompositionStore = defineStore("composition", {
       console.log("Update duration for one beat is done");
       this.markDirty();
       this._persistCurrentBeat(barOrderIndex, beatOrderIndex);
+    },
+    _findBeat(barOrderIndex, beatOrderIndex) {
+      const ns = this.getComposition?.notesheets?.[this.chosenNotesheet];
+      const bar = ns?.bars?.find((b) => b.orderIndex === barOrderIndex);
+      const beat = bar?.beats?.find((b) => b.orderIndex === beatOrderIndex);
+      return { ns, bar, beat };
+    },
+    _findCursorBeatNote() {
+      const cursor = this.ensureCursor();
+      if (!cursor) return null;
+      const { beat } = this._findBeat(cursor.barOrder, cursor.beatOrder);
+      if (!beat) return null;
+      const note = beat.beatNotes?.find(
+        (bn) => bn?.position?.string === cursor.string
+      );
+      return { cursor, beat, note };
+    },
+    toggleBeatDotted(barOrderIndex, beatOrderIndex) {
+      this.pushHistory();
+      const { beat } = this._findBeat(barOrderIndex, beatOrderIndex);
+      if (!beat) return;
+      beat.dotted = !beat.dotted;
+      this.markDirty();
+      this._persistCurrentBeat(barOrderIndex, beatOrderIndex);
+    },
+    toggleBeatRest(barOrderIndex, beatOrderIndex) {
+      this.pushHistory();
+      const { beat } = this._findBeat(barOrderIndex, beatOrderIndex);
+      if (!beat) return;
+      beat.rest = !beat.rest;
+      this.markDirty();
+      this._persistCurrentBeat(barOrderIndex, beatOrderIndex);
+    },
+    toggleBeatTuplet(barOrderIndex, beatOrderIndex) {
+      this.pushHistory();
+      const { beat } = this._findBeat(barOrderIndex, beatOrderIndex);
+      if (!beat) return;
+      if (beat.tupletNum === 3 && beat.tupletDen === 2) {
+        beat.tupletNum = null;
+        beat.tupletDen = null;
+      } else {
+        beat.tupletNum = 3;
+        beat.tupletDen = 2;
+      }
+      this.markDirty();
+      this._persistCurrentBeat(barOrderIndex, beatOrderIndex);
+    },
+    toggleNoteTiedAtCursor() {
+      this.pushHistory();
+      const hit = this._findCursorBeatNote();
+      if (!hit?.note) return;
+      hit.note.tied = !hit.note.tied;
+      this.markDirty();
+      this._persistCurrentBeat(hit.cursor.barOrder, hit.cursor.beatOrder);
+    },
+    /**
+     * @param {string|null} technique hammer|pull|slide_up|slide_down|bend|null
+     * @param {string|null} bendValue half|full|null
+     */
+    setNoteTechniqueAtCursor(technique, bendValue = null) {
+      this.pushHistory();
+      const hit = this._findCursorBeatNote();
+      if (!hit?.note) return;
+      if (hit.note.technique === technique && (!bendValue || hit.note.bendValue === bendValue)) {
+        hit.note.technique = null;
+        hit.note.bendValue = null;
+      } else {
+        hit.note.technique = technique || null;
+        hit.note.bendValue =
+          technique === "bend" ? bendValue || "half" : null;
+      }
+      this.markDirty();
+      this._persistCurrentBeat(hit.cursor.barOrder, hit.cursor.beatOrder);
     },
     deleteBeat(barOrderIndex, beatOrderIndex) {
       this.pushHistory();

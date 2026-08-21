@@ -122,6 +122,40 @@ const isPlayheadBeat = computed(() => {
   );
 });
 
+const isDotted = computed(() => Boolean(props.beat?.dotted));
+const isRest = computed(() => Boolean(props.beat?.rest));
+const isTuplet = computed(
+  () => props.beat?.tupletNum === 3 && props.beat?.tupletDen === 2
+);
+
+/** First of a consecutive same-tuplet run in this bar → draw bracket start. */
+const tupletBracketStart = computed(() => {
+  if (!isTuplet.value) return false;
+  const ns = store.getComposition?.notesheets?.[store.getChosenNotesheet];
+  const bar = ns?.bars?.find((b) => b.orderIndex === props.orderIndex);
+  if (!bar?.beats?.length) return true;
+  const sorted = [...bar.beats].sort((a, b) => a.orderIndex - b.orderIndex);
+  const idx = sorted.findIndex((b) => b.orderIndex === props.beatOrderIndex);
+  if (idx <= 0) return true;
+  const prev = sorted[idx - 1];
+  return !(prev.tupletNum === 3 && prev.tupletDen === 2);
+});
+
+const tupletRunLength = computed(() => {
+  if (!tupletBracketStart.value) return 1;
+  const ns = store.getComposition?.notesheets?.[store.getChosenNotesheet];
+  const bar = ns?.bars?.find((b) => b.orderIndex === props.orderIndex);
+  if (!bar?.beats?.length) return 1;
+  const sorted = [...bar.beats].sort((a, b) => a.orderIndex - b.orderIndex);
+  const idx = sorted.findIndex((b) => b.orderIndex === props.beatOrderIndex);
+  let n = 0;
+  for (let i = idx; i < sorted.length; i++) {
+    if (sorted[i].tupletNum === 3 && sorted[i].tupletDen === 2) n++;
+    else break;
+  }
+  return Math.max(1, n);
+});
+
 function updateSvgComponent() {
   if (!currentDuration.value) return;
 
@@ -175,17 +209,31 @@ div.beat-wrapper(
   @click="onBeatSeek"
   style="position: relative;"
   :data-playhead-beat="`${props.orderIndex}-${props.beatOrderIndex}`"
-  :class="{ 'playhead-active': isPlayheadBeat }"
+  :class="{ 'playhead-active': isPlayheadBeat, 'is-rest': isRest, 'is-tuplet': isTuplet }"
 )
   div.transparent-overlay
     DeleteBeat.delete-beat(v-if="showDeleteIcon && store.getEditModeStatus" :barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
+  div.tuplet-bracket(
+    v-if="tupletBracketStart"
+    :style="{ width: `calc(${tupletRunLength} * 90px - 20px)` }"
+  )
+    span.tuplet-num 3
   div.beat
-    NoteList(:beat="props.beat" :orderIndex="props.orderIndex" :barId="props.barId" :beatId="props?.beatId" :beatOrderIndex="props.beatOrderIndex")
+    NoteList(
+      v-if="!isRest"
+      :beat="props.beat"
+      :orderIndex="props.orderIndex"
+      :barId="props.barId"
+      :beatId="props?.beatId"
+      :beatOrderIndex="props.beatOrderIndex"
+    )
+    div.rest-mark(v-else) 𝄽
   div
-    TrashIcon.add-button.logo(ref="buttonRef" @click="togglePanel" v-if="isHovered && store.getEditModeStatus" viewBox="0 0 24 24" width="24" height="24") 
+    TrashIcon.add-button.logo(ref="buttonRef" @click="togglePanel" v-if="isHovered && store.getEditModeStatus" viewBox="0 0 24 24" width="24" height="24")
     div.popup-panel(v-if="showPanel" ref="panelRef")
       BeatPanel(:barOrderIndex="props.orderIndex" :beatOrderIndex="props.beatOrderIndex")
-  component.eigth-svg(v-if="SvgComponent" :is="SvgComponent" :points="svgProps")
+  component.eigth-svg(v-if="SvgComponent && !isRest" :is="SvgComponent" :points="svgProps")
+  span.dotted-dot(v-if="isDotted && !isRest" aria-hidden="true")
 </template>
 
 <style scoped>
@@ -261,12 +309,56 @@ div.beat-wrapper(
   position: absolute;
   bottom: 0px;
   left: 60px;
-  width: 100px;
-  height: 200px;
+  width: 160px;
+  min-height: 200px;
   padding: 10px;
   background: #ffffff;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 500;
+}
+.dotted-dot {
+  position: absolute;
+  top: calc(110% + 48px);
+  left: calc(47% + 14px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #222;
+  pointer-events: none;
+  z-index: 2;
+}
+.rest-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 28px;
+  color: #333;
+  pointer-events: none;
+}
+.tuplet-bracket {
+  position: absolute;
+  top: -18px;
+  left: 40px;
+  height: 14px;
+  border-top: 2px solid #333;
+  border-left: 2px solid #333;
+  border-right: 2px solid #333;
+  pointer-events: none;
+  z-index: 3;
+  box-sizing: border-box;
+}
+.tuplet-num {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  background: #fff;
+  padding: 0 4px;
+  color: #333;
 }
 </style>
